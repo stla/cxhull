@@ -36,7 +36,7 @@ of dimension `dim-1`. Thus the facets are the edges in dimension 2, and they
 are the faces of the convex polyhedron in dimension 3.
 
 ```{r}
-library(cxhull) 
+library(cxhull)
 vertices <- rbind(
   c(0.5, 0.5, 0.5),
   c(0, 0, 0),
@@ -79,8 +79,8 @@ hull$facets
 ```
 
 Observe that the `family` field is always `NA`.
-This field has a non-missing value only when one requires the triangulation of
-the convex hull:
+This field has a possibly non-missing value only when one requires the
+triangulation of the convex hull:
 
 ```{r}
 thull <- cxhull(vertices, triangulate = TRUE)
@@ -93,7 +93,31 @@ Therefore one gets six different families, each one consisting of two
 triangles: two triangles belong to the same family mean that they are parts of
 the same facet of the non-triangulated hull.
 
-The triangulation is useful to plot a 3-dimensional hull.
+The triangulation is useful to plot a 3-dimensional hull:
+
+```{r, eval=FALSE}
+library(rgl)
+# generates 50 points in the unit sphere (uniformly)
+set.seed(666)
+npoints <- 50
+r <- runif(npoints)
+theta <- runif(npoints, 0, 2*pi)
+v <- runif(npoints, -1, 1)
+points <- t(mapply(function(r,theta,v){
+  r*c(cos(theta)*sin(acos(v)), sin(theta)*sin(acos(v)), v)
+}, r, theta, v))
+# computes the triangulated convex hull
+h <- cxhull(points, triangulate = TRUE)
+# plot
+for(i in 1:length(h$facets)){
+  triangle <- t(sapply(h$facets[[i]]$vertices,
+                       function(id) h$vertices[[as.character(id)]]$point))
+  triangles3d(triangle, color="blue")
+}
+```
+
+![Imgur](https://i.imgur.com/9Awcfg7.png)
+
 
 ## Ordonning the vertices
 
