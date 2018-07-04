@@ -1,0 +1,120 @@
+---
+title: "cxhull"
+author: ""
+date: "2018-06-04"
+output:
+  github_document:
+    toc: yes
+  html_document:
+    toc: yes
+    keep_md: no
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
+```
+
+The purpose of the `cxhull` package is to compute the convex hull of a set of
+points in arbitrary dimension.
+
+The output of the `cxhull` function is a list with the following fields.
+
+- `vertices`: The vertices of the convex hull. Each vertex is given with its
+neighbour vertices, its neighbour ridges and its neighbour facets.
+
+- `edges`: The edges of the convex hull, given as pairs of vertices
+identifiants.
+
+- `ridges`: The ridges of the convex hull, i.e. the elements of the convex hull
+of dimension `dim-2`. Thus the ridges are just the vertices in dimension 2, and
+they are the edges in dimension 3.
+
+- `facets`: The facets of the convex hull, i.e. the elements of the convex hull
+of dimension `dim-1`. Thus the facets are the edges in dimension 2, and they
+are the faces of the convex polyhedron in dimension 3.
+
+```{r}
+library(cxhull) 
+vertices <- rbind(
+  c(0.5, 0.5, 0.5),
+  c(0, 0, 0),
+  c(0, 0, 1),
+  c(0, 1, 0),
+  c(0, 1, 1),
+  c(1, 0, 0),
+  c(1, 0, 1),
+  c(1, 1, 0),
+  c(1, 1, 1)
+)
+hull <- cxhull(vertices)
+```
+
+```{r}
+hull$vertices
+```
+
+Edges are given as a matrix, each row representing an edge given as a pair of
+vertices identifiants:
+
+```{r}
+hull$edges
+```
+
+The ridges are given as a list:
+
+```{r}
+hull$ridges
+```
+
+The `vertices` field provides the vertices identifiants of the ridge.
+A ridge is between two facets. The identifiants of these facets are given in
+the field `ridgeOf`.
+
+Facets are given as a list:
+
+```{r}
+hull$facets
+```
+
+Observe that the `family` field is always `NA`.
+This field has a non-missing value only when one requires the triangulation of
+the convex hull:
+
+```{r}
+thull <- cxhull(vertices, triangulate = TRUE)
+lapply(thull$facets, `[[`, "family")
+```
+
+The hull is triangulated into 12 triangles: each face of the cube is
+triangulated into two triangles.
+Therefore one gets six different families, each one consisting of two
+triangles: two triangles belong to the same family mean that they are parts of
+the same facet of the non-triangulated hull.
+
+The triangulation is useful to plot a 3-dimensional hull.
+
+## Ordonning the vertices
+
+Observe the vertices of the first face of the cube:
+
+```{r}
+hull$facets[[1]]$vertices
+```
+
+They are given as `2-4-6-8`.
+They are not ordered, in the sense that `4-6` and `8-2` are not edges of this
+face:
+
+```{r}
+( face_edges <- hull$facets[[1]]$edges )
+```
+
+To order the vertices, one can use the `igraph` package as follows:
+
+```{r, message=FALSE}
+library(igraph)
+g <- graph_from_edgelist(apply(face_edges,2,as.character))
+biconnected_components(g)$components[[1]]
+```
