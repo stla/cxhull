@@ -2,6 +2,7 @@
 #' @description Computes the convex hull of a set of points.
 #' @param points numeric matrix, one point per row
 #' @param triangulate logical, whether to triangulate the convex hull
+#' @return A list.
 #' @export
 #' @useDynLib cxhull
 #' @examples
