@@ -716,7 +716,8 @@ ConvexHullT* convexHull(
 
 }
 
-/* R */
+// ----------------------------------- R ------------------------------------ //
+// FullVertexT to SEXP //
 SEXP VertexSXP(FullVertexT vertex, unsigned dim){
   unsigned nprotect = 0;
   SEXP R_vertex, names, id, point, neighvertices, neighridges, neighfacets;
@@ -773,6 +774,7 @@ SEXP VertexSXP(FullVertexT vertex, unsigned dim){
   return R_vertex;
 }
 
+// RidgeT to SEXP //
 SEXP RidgeSXP(RidgeT ridge){
   unsigned nprotect = 0;
   SEXP R_ridge, names, id, vertices, ridgeOf;
@@ -791,7 +793,7 @@ SEXP RidgeSXP(RidgeT ridge){
   PROTECT(ridgeOf = allocVector(INTSXP, 2));
   nprotect++;
   INTEGER(ridgeOf)[0] = 1 + ridge.ridgeOf1;
-  INTEGER(ridgeOf)[1] = 1 + ridge.ridgeOf2; // NA si =nfaces ? non c'est -1 dans Delaunay mais je ne comprends pas comment ça peut arriver
+  INTEGER(ridgeOf)[1] = 1 + ridge.ridgeOf2;
 
   PROTECT(R_ridge = allocVector(VECSXP, 3));
   nprotect++;
@@ -810,14 +812,11 @@ SEXP RidgeSXP(RidgeT ridge){
   return R_ridge;
 }
 
+// FaceT to SEXP //
 SEXP FaceSXP(FaceT face, unsigned dim){
   unsigned nprotect = 0;
   SEXP R_face, names, vertices, edges, ridges, neighbors, volume, center,
        normal, offset, family;
-
-  // PROTECT(id = allocVector(INTSXP, 1));
-  // nprotect++;
-  // INTEGER(id)[0] = 1 + face.id;
 
   unsigned nvertices = face.nvertices;
   PROTECT(vertices = allocVector(INTSXP, nvertices));
@@ -901,7 +900,8 @@ SEXP FaceSXP(FaceT face, unsigned dim){
   return R_face;
 }
 
-SEXP chull(SEXP p, SEXP triangulate){
+// main function //
+SEXP cxhull(SEXP p, SEXP triangulate){
 
   unsigned nprotect = 0;
 
@@ -933,7 +933,7 @@ SEXP chull(SEXP p, SEXP triangulate){
 
   SEXP out, names, R_vertices, vnames, R_edges, R_ridges, R_faces;
 
-  PROTECT(R_vertices = allocVector(VECSXP, nvertices)); // tu pourrais faire une matrice avec rownames pour les id ; ou alors id en names de la liste
+  PROTECT(R_vertices = allocVector(VECSXP, nvertices));
   PROTECT(vnames = allocVector(STRSXP, nvertices));
   nprotect += 2;
   for(unsigned i=0; i<nvertices; i++){

@@ -30,5 +30,5 @@ cxhull <- function(points, triangulate=FALSE){
   if(any(is.na(points))){
     stop("missing values are not allowed")
   }
-  .Call("chull", points, as.integer(triangulate))
+  .Call("cxhull", points, as.integer(triangulate))
 }
