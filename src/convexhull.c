@@ -775,9 +775,9 @@ SEXP VertexSXP(FullVertexT vertex, unsigned dim){
 }
 
 // RidgeT to SEXP //
-SEXP RidgeSXP(RidgeT ridge){
+SEXP RidgeSXP(RidgeT ridge, unsigned dim){
   unsigned nprotect = 0;
-  SEXP R_ridge, names, id, vertices, ridgeOf;
+  SEXP R_ridge, names, id, vertices, edges, ridgeOf;
 
   PROTECT(id = allocVector(INTSXP, 1));
   nprotect++;
@@ -786,8 +786,18 @@ SEXP RidgeSXP(RidgeT ridge){
   unsigned nvertices = ridge.nvertices;
   PROTECT(vertices = allocVector(INTSXP, nvertices));
   nprotect++;
-  for(unsigned i=0; i<nvertices; i++){
+  for(unsigned i=0; i < nvertices; i++){
     INTEGER(vertices)[i] = 1 + ((ridge.vertices)[i]).id;
+  }
+
+  if(dim > 3){
+    unsigned nedges = ridge.nedges;
+    PROTECT(edges = allocMatrix(INTSXP, nedges, 2));
+    nprotect++;
+    for(unsigned i=0; i < nedges; i++){
+      INTEGER(edges)[i] = 1 + ridge.edges[i][0];
+      INTEGER(edges)[i+nedges] = 1 + ridge.edges[i][1];
+    }
   }
 
   PROTECT(ridgeOf = allocVector(INTSXP, 2));
@@ -795,17 +805,25 @@ SEXP RidgeSXP(RidgeT ridge){
   INTEGER(ridgeOf)[0] = 1 + ridge.ridgeOf1;
   INTEGER(ridgeOf)[1] = 1 + ridge.ridgeOf2;
 
-  PROTECT(R_ridge = allocVector(VECSXP, 3));
+  unsigned length = dim > 3 ? 4 : 3;
+
+  PROTECT(R_ridge = allocVector(VECSXP, length));
   nprotect++;
   SET_VECTOR_ELT(R_ridge, 0, id);
-  SET_VECTOR_ELT(R_ridge, 1, vertices);
-  SET_VECTOR_ELT(R_ridge, 2, ridgeOf);
+  SET_VECTOR_ELT(R_ridge, 1, ridgeOf);
+  SET_VECTOR_ELT(R_ridge, 2, vertices);
+  if(dim > 3){
+    SET_VECTOR_ELT(R_ridge, 3, edges);
+  }
 
-  PROTECT(names = allocVector(VECSXP, 3));
+  PROTECT(names = allocVector(VECSXP, length));
   nprotect++;
   SET_VECTOR_ELT(names, 0, mkChar("id"));
-  SET_VECTOR_ELT(names, 1, mkChar("vertices"));
-  SET_VECTOR_ELT(names, 2, mkChar("ridgeOf"));
+  SET_VECTOR_ELT(names, 1, mkChar("ridgeOf"));
+  SET_VECTOR_ELT(names, 2, mkChar("vertices"));
+  if(dim > 3){
+    SET_VECTOR_ELT(names, 3, mkChar("edges"));
+  }
   setAttrib(R_ridge, R_NamesSymbol, names);
 
   UNPROTECT(nprotect);
@@ -953,7 +971,7 @@ SEXP cxhull(SEXP p, SEXP triangulate){
   PROTECT(R_ridges = allocVector(VECSXP, nridges));
   nprotect++;
   for(unsigned i=0; i<nridges; i++){
-    SET_VECTOR_ELT(R_ridges, i, RidgeSXP(ridges[i]));
+    SET_VECTOR_ELT(R_ridges, i, RidgeSXP(ridges[i], dim));
   }
 
   PROTECT(R_faces = allocVector(VECSXP, nfaces));
