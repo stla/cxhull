@@ -1,6 +1,6 @@
+#include <R.h> // to use error
 #include <stdlib.h> // to use realloc
 #include <math.h> // to use NAN
-#include <stdio.h> // to use printf
 
 double* getpoint(double* points, unsigned dim, unsigned id){
   double* out = malloc(dim * sizeof(double));
@@ -65,8 +65,7 @@ void appendu(unsigned x, unsigned** array, unsigned length, unsigned* flag){
   if(*flag==1){
     *array = realloc(*array, (length+1)*sizeof(unsigned));
     if(*array == NULL){
-      printf("realloc failure - exiting");
-      exit(1);
+      error("realloc failure - exiting");
     }
     *(*array + length) = x;
   }

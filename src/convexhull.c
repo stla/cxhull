@@ -91,8 +91,7 @@ void appendv(VertexT x, VertexT** array, unsigned length, unsigned* flag){
   if(*flag == 1){
     *array = realloc(*array, (length+1) * sizeof(VertexT));
     if(*array == NULL){
-      printf("realloc failure - exiting\n");
-      exit(1);
+      error("realloc failure - exiting\n");
     }
     *(*array + length) = x;
   }
@@ -174,8 +173,7 @@ RidgeT* allRidges(FaceT *faces, unsigned nfaces, unsigned dim,
       if(count == n){
         out = realloc(out, (*length+1) * sizeof(RidgeT));
         if(out == NULL){
-          printf("realloc failure - exiting\n");
-          exit(1);
+          error("realloc failure - exiting\n");
         }
         out[*length] = copyRidge(faces[f].ridges[j], dim);
         out[*length].id = *length;
@@ -272,8 +270,7 @@ unsigned* neighRidges(unsigned id, RidgeT* allridges, unsigned nridges,
     if(flag){
       neighs = realloc(neighs, (*length+1)*sizeof(unsigned));
       if(neighs == NULL){
-        printf("realloc failure - exiting\n");
-        exit(1);
+        error("realloc failure - exiting\n");
       }
       neighs[*length] = e;
       (*length)++;
@@ -431,7 +428,7 @@ ConvexHullT* convexHull(
         }
         /*if(dim == 3){ // orientation of the normals
           pointT* onepoint = ((vertexT*)facet->vertices->e[0].p)->point;
-          double thepoint[dim]; // onepoint+normal 
+          double thepoint[dim]; // onepoint+normal
           for(unsigned i=0; i < dim; i++){
             thepoint[i] = onepoint[i] + faces[i_facet].normal[i];
           }
