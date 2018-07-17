@@ -207,109 +207,109 @@ hull$ridges
 ## [[1]]$id
 ## [1] 1
 ## 
-## [[1]]$vertices
-## [1] 2 4
-## 
 ## [[1]]$ridgeOf
 ## [1] 1 4
+## 
+## [[1]]$vertices
+## [1] 2 4
 ## 
 ## 
 ## [[2]]
 ## [[2]]$id
 ## [1] 2
 ## 
-## [[2]]$vertices
-## [1] 2 6
-## 
 ## [[2]]$ridgeOf
 ## [1] 1 2
+## 
+## [[2]]$vertices
+## [1] 2 6
 ## 
 ## 
 ## [[3]]
 ## [[3]]$id
 ## [1] 3
 ## 
-## [[3]]$vertices
-## [1] 6 8
-## 
 ## [[3]]$ridgeOf
 ## [1] 1 3
+## 
+## [[3]]$vertices
+## [1] 6 8
 ## 
 ## 
 ## [[4]]
 ## [[4]]$id
 ## [1] 4
 ## 
-## [[4]]$vertices
-## [1] 4 8
-## 
 ## [[4]]$ridgeOf
 ## [1] 1 5
+## 
+## [[4]]$vertices
+## [1] 4 8
 ## 
 ## 
 ## [[5]]
 ## [[5]]$id
 ## [1] 5
 ## 
-## [[5]]$vertices
-## [1] 2 3
-## 
 ## [[5]]$ridgeOf
 ## [1] 2 4
+## 
+## [[5]]$vertices
+## [1] 2 3
 ## 
 ## 
 ## [[6]]
 ## [[6]]$id
 ## [1] 6
 ## 
-## [[6]]$vertices
-## [1] 6 7
-## 
 ## [[6]]$ridgeOf
 ## [1] 2 3
+## 
+## [[6]]$vertices
+## [1] 6 7
 ## 
 ## 
 ## [[7]]
 ## [[7]]$id
 ## [1] 7
 ## 
-## [[7]]$vertices
-## [1] 3 7
-## 
 ## [[7]]$ridgeOf
 ## [1] 2 6
+## 
+## [[7]]$vertices
+## [1] 3 7
 ## 
 ## 
 ## [[8]]
 ## [[8]]$id
 ## [1] 8
 ## 
-## [[8]]$vertices
-## [1] 8 9
-## 
 ## [[8]]$ridgeOf
 ## [1] 3 5
+## 
+## [[8]]$vertices
+## [1] 8 9
 ## 
 ## 
 ## [[9]]
 ## [[9]]$id
 ## [1] 9
 ## 
-## [[9]]$vertices
-## [1] 7 9
-## 
 ## [[9]]$ridgeOf
 ## [1] 3 6
+## 
+## [[9]]$vertices
+## [1] 7 9
 ## 
 ## 
 ## [[10]]
 ## [[10]]$id
 ## [1] 10
 ## 
-## [[10]]$vertices
+## [[10]]$ridgeOf
 ## [1] 4 5
 ## 
-## [[10]]$ridgeOf
+## [[10]]$vertices
 ## [1] 4 5
 ## 
 ## 
@@ -317,22 +317,22 @@ hull$ridges
 ## [[11]]$id
 ## [1] 11
 ## 
-## [[11]]$vertices
-## [1] 3 5
-## 
 ## [[11]]$ridgeOf
 ## [1] 4 6
+## 
+## [[11]]$vertices
+## [1] 3 5
 ## 
 ## 
 ## [[12]]
 ## [[12]]$id
 ## [1] 12
 ## 
-## [[12]]$vertices
-## [1] 5 9
-## 
 ## [[12]]$ridgeOf
 ## [1] 5 6
+## 
+## [[12]]$vertices
+## [1] 5 9
 ```
 
 The `vertices` field provides the vertices identifiants of the ridge. A
@@ -643,6 +643,19 @@ To order the vertices, one can use the `igraph` package as follows:
 library(igraph)
 g <- graph_from_edgelist(apply(face_edges,2,as.character))
 biconnected_components(g)$components[[1]]
-## + 4/4 vertices, named, from 17bdec9:
+## + 4/4 vertices, named, from d9f762c:
 ## [1] 6 8 4 2
 ```
+
+## Volume
+
+To get the volume of the convex hull (area in dimension 2, volume in
+dimension 3, hypervolume in higer dimension), do:
+
+``` r
+1/d * sum(sapply(hull$facets, 
+                 function(f) crossprod(f[["center"]], f[["normal"]])) * 
+            sapply(hull$facets, "[[", "volume"))
+```
+
+where `d` is the dimension.

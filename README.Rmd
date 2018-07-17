@@ -142,3 +142,15 @@ library(igraph)
 g <- graph_from_edgelist(apply(face_edges,2,as.character))
 biconnected_components(g)$components[[1]]
 ```
+
+
+## Volume 
+
+To get the volume of the convex hull (area in dimension 2, volume in dimension 3, hypervolume in higer dimension), do:
+
+```{r, eval=FALSE}
+1/d * sum(sapply(hull$facets, 
+                 function(f) crossprod(f[["center"]], f[["normal"]])) * 
+            sapply(hull$facets, "[[", "volume"))
+```
+where `d` is the dimension.
