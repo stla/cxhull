@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include <R_ext/Error.h>
+#include <R_ext/Print.h>
 
 
 /*-<a                             href="qh-user_r.htm#TOC"
@@ -62,8 +63,8 @@ void qh_fprintf_stderr(int msgcode, const char *fmt, ... ) {
 
     va_start(args, fmt);
     if(msgcode)
-      fprintf(stderr, "QH%.4d ", msgcode);
-    vfprintf(stderr, fmt, args);
+      REprintf("QH%.4d ", msgcode);
+    REvprintf(fmt, args);
     va_end(args);
 } /* fprintf_stderr */
 

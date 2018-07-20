@@ -128,9 +128,9 @@ int qh_new_qhull(qhT *qh, int dim, int numpoints, coordT *points, boolT ismalloc
   boolT new_ismalloc;
   coordT *new_points;
 
-  if(!errfile){
-    errfile= stderr;
-  }
+//  if(!errfile){
+//    errfile= stderr;
+//  }
   if (!qh->qhmem.ferr) {
     qh_meminit(qh, errfile);
   } else {

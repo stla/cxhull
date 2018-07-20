@@ -304,10 +304,10 @@ void qh_memfreeshort(qhT *qh, int *curlong, int *totlong) {
 void qh_meminit(qhT *qh, FILE *ferr) {
 
   memset((char *)&qh->qhmem, 0, sizeof(qh->qhmem));  /* every field is 0, FALSE, NULL */
-  if (ferr)
+//  if (ferr)
       qh->qhmem.ferr= ferr;
-  else
-      qh->qhmem.ferr= stderr;
+//  else
+//      qh->qhmem.ferr= stderr;
   if (sizeof(void*) < sizeof(int)) {
     qh_fprintf(qh, qh->qhmem.ferr, 6083, "qhull internal error (qh_meminit): sizeof(void*) %d < sizeof(int) %d.  qset.c will not work\n", (int)sizeof(void*), (int)sizeof(int));
     qh_exit(qhmem_ERRqhull);  /* can not use qh_errexit() */
