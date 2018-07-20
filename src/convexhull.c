@@ -371,21 +371,23 @@ ConvexHullT* convexHull(
 	unsigned  dim,
 	unsigned  n,
   unsigned  triangulate,
-	unsigned* exitcode
+	unsigned* exitcode,
+  const char* errfilename
 )
 {
-	char opts[250]; /* option flags for qhull, see qh_opt.htm */
+	char opts[250]; // option flags for qhull, see qh_opt.htm
   sprintf(opts, "qhull s FF %s", triangulate ? "Qt" : "");
-	qhT qh_qh;       /* Qhull's data structure */
+	qhT qh_qh;       // Qhull's data structure
   qhT *qh= &qh_qh;
   QHULL_LIB_CHECK
   qh_meminit(qh, stderr);
 	boolT ismalloc  = False; // True if qhull should free points in qh_freeqhull() or reallocation
-	FILE* errfile   = NULL;
+	FILE* errfile   = fopen(errfilename, "w+"); // NULL;
   FILE* outfile   = NULL;
   qh_zero(qh, errfile);
 	exitcode[0] = qh_new_qhull(qh, dim, n, points, ismalloc, opts, outfile,
                              errfile);
+  fclose(errfile);
 
   ConvexHullT* out = malloc(sizeof(ConvexHullT));
 
@@ -871,7 +873,7 @@ SEXP FaceSXP(FaceT face, unsigned dim){
 }
 
 // main function ---------------------------------------------------------------
-SEXP cxhull(SEXP p, SEXP triangulate){
+SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
 
   unsigned nprotect = 0;
 
@@ -886,7 +888,8 @@ SEXP cxhull(SEXP p, SEXP triangulate){
   unsigned tri = INTEGER(triangulate)[0];
 
   unsigned exitcode;
-  ConvexHullT* ch = convexHull(points, dim, n, tri, &exitcode);
+  const char* e = R_CHAR(Rf_asChar(errfile));
+  ConvexHullT* ch = convexHull(points, dim, n, tri, &exitcode, e);
 
   if (exitcode) {
     error("Received error code %d from qhull.", exitcode);

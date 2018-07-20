@@ -98,9 +98,8 @@ The triangulation is useful to plot a 3-dimensional hull:
 ```{r, eval=FALSE}
 library(rgl)
 # generates 50 points in the unit sphere (uniformly)
-set.seed(666)
 npoints <- 50
-r <- runif(npoints)
+r <- runif(npoints)^(1/3)
 theta <- runif(npoints, 0, 2*pi)
 v <- runif(npoints, -1, 1)
 points <- t(mapply(function(r,theta,v){
@@ -144,13 +143,13 @@ biconnected_components(g)$components[[1]]
 ```
 
 
-## Volume 
+## Volume
 
 To get the volume of the convex hull (area in dimension 2, volume in dimension 3, hypervolume in higer dimension), do:
 
 ```{r, eval=FALSE}
-1/d * sum(sapply(hull$facets, 
-                 function(f) crossprod(f[["center"]], f[["normal"]])) * 
+1/d * sum(sapply(hull$facets,
+                 function(f) crossprod(f[["center"]], f[["normal"]])) *
             sapply(hull$facets, "[[", "volume"))
 ```
 where `d` is the dimension.

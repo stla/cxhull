@@ -4,7 +4,7 @@
 #' @param triangulate logical, whether to triangulate the convex hull
 #' @return A list.
 #' @export
-#' @useDynLib cxhull
+#' @useDynLib cxhull, .registration = TRUE
 #' @examples
 #' vertices <- rbind(
 #'  c(0.5,0.5,0.5),
@@ -31,5 +31,11 @@ cxhull <- function(points, triangulate=FALSE){
   if(any(is.na(points))){
     stop("missing values are not allowed")
   }
-  .Call("cxhull", points, as.integer(triangulate))
+  errfile <- tempfile(fileext=".txt")
+  tryCatch({
+    .Call("cxhull_", points, as.integer(triangulate), errfile)
+  }, error = function(e){
+    cat(readLines(errfile), sep="\n")
+    stop(e)
+  })
 }

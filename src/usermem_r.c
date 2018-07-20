@@ -23,6 +23,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include <R_ext/Error.h>
+
+
 /*-<a                             href="qh-user_r.htm#TOC"
   >-------------------------------</a><a name="qh_exit">-</a>
 
@@ -36,7 +39,7 @@
     To replace qh_exit with 'throw', see libqhullcpp/usermem_r-cpp.cpp
 */
 void qh_exit(int exitcode) {
-    exit(exitcode);
+    error("Exit with code %d.", exitcode);
 } /* exit */
 
 /*-<a                             href="qh-user_r.htm#TOC"
@@ -47,7 +50,7 @@ void qh_exit(int exitcode) {
 
   notes:
     qh_fprintf_stderr() is called when qh->ferr is not defined, usually due to an initialization error
-    
+
     It is typically followed by qh_errexit().
 
     Redefine this function to avoid using stderr
@@ -72,7 +75,7 @@ void qh_fprintf_stderr(int msgcode, const char *fmt, ... ) {
 
   notes:
     same as free()
-    No calls to qh_errexit() 
+    No calls to qh_errexit()
 */
 void qh_free(void *mem) {
     free(mem);
@@ -90,5 +93,3 @@ void qh_free(void *mem) {
 void *qh_malloc(size_t size) {
     return malloc(size);
 } /* malloc */
-
-
