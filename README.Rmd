@@ -1,10 +1,9 @@
 ---
 title: "cxhull"
 author: ""
-date: "2018-06-04"
+date: "2018-06-21"
 output:
   github_document:
-    toc: yes
   html_document:
     toc: yes
     keep_md: no
@@ -18,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 
 The purpose of the `cxhull` package is to compute the convex hull of a set of
 points in arbitrary dimension.
+It contains only one function: `cxhull`.
 
 The output of the `cxhull` function is a list with the following fields.
 
@@ -35,9 +35,15 @@ they are the edges in dimension 3.
 of dimension `dim-1`. Thus the facets are the edges in dimension 2, and they
 are the faces of the convex polyhedron in dimension 3.
 
+- `volume`: The volume of the convex hull
+(area in dimension 2, volume in dimension 3, hypervolume in higher dimension).
+
+Let's look at an example. The points we take are the vertices of a cube and
+the center of this cube (in the first row):
+
 ```{r}
 library(cxhull)
-vertices <- rbind(
+points <- rbind(
   c(0.5, 0.5, 0.5),
   c(0, 0, 0),
   c(0, 0, 1),
@@ -48,15 +54,34 @@ vertices <- rbind(
   c(1, 1, 0),
   c(1, 1, 1)
 )
-hull <- cxhull(vertices)
+hull <- cxhull(points)
 ```
 
+Obviously, the convex hull of these points is the cube.
+We can quickly see that the convex hull has 8 vertices, 12 edges, 12 ridges,
+6 facets, and its volume is 1:
+
 ```{r}
-hull$vertices
+str(hull, max=1)
+```
+
+Each vertex, each ridge, and each facet has an identifier.
+A vertex identifier is the index of the row corresponding to
+this vertex in the set of points passed to the `cxhull` function.
+It is given in the field `id` of the vertex:
+
+```{r}
+hull$vertices[[1]]
+```
+
+Also, the list of vertices is named with the identifiers:
+
+```{r}
+names(hull$vertices)
 ```
 
 Edges are given as a matrix, each row representing an edge given as a pair of
-vertices identifiants:
+vertices identifiers:
 
 ```{r}
 hull$edges
@@ -65,26 +90,34 @@ hull$edges
 The ridges are given as a list:
 
 ```{r}
-hull$ridges
+hull$ridges[[1]]
 ```
 
-The `vertices` field provides the vertices identifiants of the ridge.
-A ridge is between two facets. The identifiants of these facets are given in
+The `vertices` field provides the vertices identifiers of the ridge.
+A ridge is between two facets. The identifiers of these facets are given in
 the field `ridgeOf`.
 
 Facets are given as a list:
 
 ```{r}
-hull$facets
+hull$facets[[1]]
 ```
 
-Observe that the `family` field is always `NA`.
+There is no `id` field for the facets: the integer `i` is the identifier of
+the `i`-th facet of the list.
+
+Here, the `family` field is `NA` for every facet:
+
+```{r}
+sapply(hull$facets, `[[`, "family")
+```
+
 This field has a possibly non-missing value only when one requires the
 triangulation of the convex hull:
 
 ```{r}
-thull <- cxhull(vertices, triangulate = TRUE)
-lapply(thull$facets, `[[`, "family")
+thull <- cxhull(points, triangulate = TRUE)
+sapply(thull$facets, `[[`, "family")
 ```
 
 The hull is triangulated into 12 triangles: each face of the cube is
@@ -97,17 +130,17 @@ The triangulation is useful to plot a 3-dimensional hull:
 
 ```{r, eval=FALSE}
 library(rgl)
-# generates 50 points in the unit sphere (uniformly)
+# generates 50 points in the unit sphere (uniformly):
 npoints <- 50
 r <- runif(npoints)^(1/3)
 theta <- runif(npoints, 0, 2*pi)
-v <- runif(npoints, -1, 1)
-points <- t(mapply(function(r,theta,v){
-  r*c(cos(theta)*sin(acos(v)), sin(theta)*sin(acos(v)), v)
-}, r, theta, v))
-# computes the triangulated convex hull
+cosphi <- runif(npoints, -1, 1)
+points <- t(mapply(function(r,theta,cosphi){
+  r * c(cos(theta)*sin(acos(cosphi)), sin(theta)*sin(acos(cosphi)), cosphi)
+}, r, theta, cosphi))
+# computes the triangulated convex hull:
 h <- cxhull(points, triangulate = TRUE)
-# plot
+# plot:
 for(i in 1:length(h$facets)){
   triangle <- t(sapply(h$facets[[i]]$vertices,
                        function(id) h$vertices[[as.character(id)]]$point))
@@ -134,22 +167,10 @@ face:
 ( face_edges <- hull$facets[[1]]$edges )
 ```
 
-To order the vertices, one can use the `igraph` package as follows:
+One can order the vertices with the help of the `igraph` package as follows:
 
 ```{r, message=FALSE}
 library(igraph)
-g <- graph_from_edgelist(apply(face_edges,2,as.character))
+g <- graph_from_edgelist(apply(face_edges, 2, as.character))
 biconnected_components(g)$components[[1]]
 ```
-
-
-## Volume
-
-To get the volume of the convex hull (area in dimension 2, volume in dimension 3, hypervolume in higer dimension), do:
-
-```{r, eval=FALSE}
-1/d * sum(sapply(hull$facets,
-                 function(f) crossprod(f[["center"]], f[["normal"]])) *
-            sapply(hull$facets, "[[", "volume"))
-```
-where `d` is the dimension.
