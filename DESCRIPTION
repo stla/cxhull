@@ -2,10 +2,12 @@ Package: cxhull
 Type: Package
 Title: Convex Hull
 Version: 0.1.0
+Date: 2018-07-21
 Author: Stéphane Laurent
 Maintainer: Stéphane Laurent <laurent_step@yahoo.fr>
 Description: Computes the convex hull in arbitrary dimension.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+BugReports: https://github.com/stla/cxhull/issues
 RoxygenNote: 6.0.1

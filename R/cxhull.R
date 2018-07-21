@@ -22,7 +22,7 @@ cxhull <- function(points, triangulate=FALSE){
   if(!is.matrix(points) || !is.numeric(points)){
     stop("`points` must be a numeric matrix")
   }
-  if(ncol(points) < 2){
+  if(ncol(points) < 2L){
     stop("dimension must be at least 2")
   }
   if(nrow(points) <= ncol(points)){
@@ -32,10 +32,14 @@ cxhull <- function(points, triangulate=FALSE){
     stop("missing values are not allowed")
   }
   errfile <- tempfile(fileext=".txt")
-  tryCatch({
+  hull <- tryCatch({
     .Call("cxhull_", points, as.integer(triangulate), errfile)
   }, error = function(e){
     cat(readLines(errfile), sep="\n")
     stop(e)
   })
+  hull$volume <- 1/ncol(points) * sum(sapply(hull$facets,
+                 function(f) crossprod(f[["center"]], f[["normal"]])) *
+            sapply(hull$facets, "[[", "volume"))
+  hull
 }
