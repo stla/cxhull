@@ -163,22 +163,42 @@ triangles <- t(sapply(hull$ridges[which(ridgeSizes==3)],
 head(triangles)
 ```
 
-Now we repeat the previous plot and we add the triangles:
+We finally add the triangles:
 
 ```{r, message=FALSE}
-open3d(windowRect = c(100,100,600,600))
-view3d(45,45)
-spheres3d(ppoints, radius= 0.07, color = "orange")
-for(i in 1:nrow(edges)){
-  shade3d(cylinder3d(rbind(ppoints[edges[i,1],],ppoints[edges[i,2],]), 
-                     radius = 0.05, sides = 30), col="gold")
-}
 for(i in 1:nrow(triangles)){
   triangles3d(rbind(
     ppoints[triangles[i,1],],
     ppoints[triangles[i,2],],
     ppoints[triangles[i,3],]),
     color = "red", alpha = 0.4)
+}
+rglwidget()
+```
+
+We could also use different colors for the tetrahedra:
+
+```{r}
+open3d(windowRect = c(100,100,600,600))
+view3d(45,45)
+spheres3d(ppoints, radius= 0.07, color = "orange")
+for(i in 1:nrow(edges)){
+  shade3d(cylinder3d(rbind(ppoints[edges[i,1],],ppoints[edges[i,2],]),
+                     radius = 0.05, sides = 30), col="gold")
+}
+cellSizes <- sapply(hull$facets, function(cell) length(cell$ridges))
+tetrahedra <- hull$facets[which(cellSizes == 4)]
+colors <- rainbow(16)
+for(i in seq_along(tetrahedra)){
+  triangles <- tetrahedra[[i]]$ridges
+  for(j in 1:4){
+    triangle <- hull$ridges[[triangles[j]]]$vertices
+    triangles3d(rbind(
+      ppoints[triangle[1],],
+      ppoints[triangle[2],],
+      ppoints[triangle[3],]),
+      color = colors[i], alpha = 0.4)
+  }
 }
 rglwidget()
 ```
