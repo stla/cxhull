@@ -13,7 +13,7 @@ The output of the `cxhull` function is a list with the following fields.
     facets.
 
   - `edges`: The edges of the convex hull, given as pairs of vertices
-    identifiants.
+    identifiers.
 
   - `ridges`: The ridges of the convex hull, i.e. the elements of the
     convex hull of dimension `dim-2`. Thus the ridges are just the
@@ -69,16 +69,16 @@ set of points passed to the `cxhull` function. It is given in the field
 hull$vertices[[1]]
 ## $id
 ## [1] 2
-## 
+##
 ## $point
 ## [1] 0 0 0
-## 
+##
 ## $neighvertices
 ## [1] 3 4 6
-## 
+##
 ## $neighridges
 ## [1] 1 2 5
-## 
+##
 ## $neighfacets
 ## [1] 1 2 4
 ```
@@ -116,10 +116,10 @@ The ridges are given as a list:
 hull$ridges[[1]]
 ## $id
 ## [1] 1
-## 
+##
 ## $ridgeOf
 ## [1] 1 4
-## 
+##
 ## $vertices
 ## [1] 2 4
 ```
@@ -134,32 +134,32 @@ Facets are given as a list:
 hull$facets[[1]]
 ## $vertices
 ## [1] 2 4 6 8
-## 
+##
 ## $edges
 ##      [,1] [,2]
 ## [1,]    2    4
 ## [2,]    2    6
 ## [3,]    4    8
 ## [4,]    6    8
-## 
+##
 ## $ridges
 ## [1] 1 2 3 4
-## 
+##
 ## $neighbors
 ## [1] 2 3 4 5
-## 
+##
 ## $volume
 ## [1] 1
-## 
+##
 ## $center
 ## [1] 0.5 0.5 0.0
-## 
+##
 ## $normal
 ## [1]  0  0 -1
-## 
+##
 ## $offset
 ## [1] 0
-## 
+##
 ## $family
 ## [1] NA
 ```

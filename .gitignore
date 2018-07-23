@@ -4,37 +4,28 @@ inst/ztemp
 
 # README html
 README.html
-
 # History files
 .Rhistory
 .Rapp.history
-
 # Session Data files
 .RData
 .Ruserdata
-
 # Example code in package build process
 *-Ex.R
-
 # Output files from R CMD build
 /*.tar.gz
-
 # Output files from R CMD check
 /*.Rcheck/
-
 # RStudio files
 .Rproj.user/
 chull.Rproj
-
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
 inst/doc/
-
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
-
 # C files
 src/*.o
 src/*.so
@@ -42,3 +33,4 @@ src/*.dll
 src-i386/
 src-x64/
 .Rproj.user
+inst/doc

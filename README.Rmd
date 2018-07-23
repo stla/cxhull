@@ -25,7 +25,7 @@ The output of the `cxhull` function is a list with the following fields.
 neighbour vertices, its neighbour ridges and its neighbour facets.
 
 - `edges`: The edges of the convex hull, given as pairs of vertices
-identifiants.
+identifiers.
 
 - `ridges`: The ridges of the convex hull, i.e. the elements of the convex hull
 of dimension `dim-2`. Thus the ridges are just the vertices in dimension 2, and
