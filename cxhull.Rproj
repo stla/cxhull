@@ -14,5 +14,5 @@ LaTeX: pdfLaTeX
 
 BuildType: Package
 PackageInstallArgs: --no-multiarch --with-keep.source
-PackageCheckArgs: --no-multiarch
+PackageCheckArgs: --no-multiarch --no-build-vignettes
 PackageRoxygenize: rd,collate,namespace
