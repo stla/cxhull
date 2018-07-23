@@ -4,7 +4,7 @@
 #' @param triangulate logical, whether to triangulate the convex hull
 #' @return A list.
 #' @export
-#' @useDynLib cxhull,.registration=TRUE
+#' @useDynLib cxhull, .registration = TRUE
 #' @examples
 #' vertices <- rbind(
 #'  c(0.5,0.5,0.5),
