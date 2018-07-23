@@ -4,7 +4,7 @@
 #' @param triangulate logical, whether to triangulate the convex hull
 #' @return A list.
 #' @export
-#' @useDynLib cxhull, .registration = TRUE
+#' @useDynLib cxhull,.registration=TRUE
 #' @examples
 #' vertices <- rbind(
 #'  c(0.5,0.5,0.5),
@@ -38,8 +38,9 @@ cxhull <- function(points, triangulate=FALSE){
     cat(readLines(errfile), sep="\n")
     stop(e)
   })
-  hull$volume <- 1/ncol(points) * sum(sapply(hull$facets,
-                 function(f) crossprod(f[["center"]], f[["normal"]])) *
-            sapply(hull$facets, "[[", "volume"))
+  hull$volume <- 1/ncol(points) * 
+    sum(sapply(hull$facets,
+               function(f) crossprod(f[["center"]], f[["normal"]])) *
+          sapply(hull$facets, "[[", "volume"))
   hull
 }
