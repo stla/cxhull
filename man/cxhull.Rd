@@ -18,7 +18,7 @@ A list.
 Computes the convex hull of a set of points.
 }
 \examples{
-vertices <- rbind(
+points <- rbind(
  c(0.5,0.5,0.5),
  c(0,0,0),
  c(0,0,1),
@@ -29,5 +29,5 @@ vertices <- rbind(
  c(1,1,0),
  c(1,1,1)
 )
-cxhull(vertices)
+cxhull(points)
 }

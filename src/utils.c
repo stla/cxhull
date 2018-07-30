@@ -1,3 +1,4 @@
+/* author: Stéphane Laurent */
 #include <R.h> // to use error
 #include <stdlib.h> // to use realloc
 #include <math.h> // to use NAN

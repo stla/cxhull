@@ -2,10 +2,12 @@ Package: cxhull
 Type: Package
 Title: Convex Hull
 Version: 0.1.0
-Date: 2018-07-23
-Author: Stéphane Laurent
+Date: 2018-07-30
+Authors@R: c(
+  person("C. B.", "Barber", role="cph", comment="author of the Qhull library"),
+  person("Stéphane", "Laurent", role=c("cph","aut","cre"), email="laurent_step@yahoo.fr"))
 Maintainer: Stéphane Laurent <laurent_step@yahoo.fr>
-Description: Computes the convex hull in arbitrary dimension.
+Description: Computes the convex hull in arbitrary dimension, based on the Qhull library (www.qhull.org). The package provides a complete description of the convex hull: edges, ridges, facets, adjacencies. Triangulation is optional.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

@@ -1,3 +1,4 @@
+/* author: Stéphane Laurent */
 typedef struct Vertex {
   unsigned id;
   double*  point;

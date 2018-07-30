@@ -40,6 +40,11 @@
    information it supplies.
 */
 
+/*
+Modification by Stéphane Laurent
+On 2018-07-30
+*/
+
 #include "qhull_ra.h"
 
 #include <stdarg.h>
@@ -523,5 +528,3 @@ void qh_user_memsizes(qhT *qh) {
   QHULL_UNUSED(qh)
   /* qh_memsize(qh, size); */
 } /* user_memsizes */
-
-

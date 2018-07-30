@@ -18,6 +18,11 @@
    Please report any errors that you fix to qhull@qhull.org
 */
 
+/*
+Modification by Stéphane Laurent
+On 2018-07-30
+*/
+
 #include "libqhull_r.h"
 
 #include <stdarg.h>
