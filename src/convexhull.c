@@ -891,7 +891,7 @@ SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
   ConvexHullT* ch = convexHull(points, dim, n, tri, &exitcode, e);
-
+  //UNPROTECT(1); // for Rf_asChar
   if (exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }
