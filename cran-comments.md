@@ -8,9 +8,16 @@
 
 0 errors | 0 warnings | 1 note
 
-* This is a new release.
+* checking installed package size ... NOTE
+  installed size is  6.5Mb
+  sub-directories of 1Mb or more:
+    doc   6.0Mb
 
 ## Reverse dependencies
 
-This is a new release, so there are no reverse dependencies.
+There are no reverse dependencies.
 
+## Summary
+
+This is a maintenance release. 
+I hopefully fixed the issues raised by the CRAN checks (in the C code).

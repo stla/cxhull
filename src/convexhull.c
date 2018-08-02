@@ -127,7 +127,7 @@ RidgeT* mergeRidges(RidgeT* ridges, unsigned nridges, unsigned* newlength){
                  ridges[i].nvertices, ridges[j].nvertices, &l);
         ridges[i].nvertices = l;
         (*newlength)--;
-        for(k = j; k < nridges; k++){
+        for(k = j; k+1 < nridges; k++){
           ridges[k] = ridges[k+1];
         }
         nridges--;
@@ -891,7 +891,6 @@ SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
   ConvexHullT* ch = convexHull(points, dim, n, tri, &exitcode, e);
-  //UNPROTECT(1); // for Rf_asChar
   if (exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }
@@ -911,7 +910,9 @@ SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
   PROTECT(vnames = allocVector(STRSXP, nvertices));
   nprotect += 2;
   for(unsigned i=0; i < nvertices; i++){
-    SEXP vertex = VertexSXP(vertices[i], dim);
+    SEXP vertex;
+    PROTECT(vertex = VertexSXP(vertices[i], dim));
+    nprotect++;
     SET_VECTOR_ELT(R_vertices, i, vertex);
     SET_STRING_ELT(vnames, i, Rf_asChar(VECTOR_ELT(vertex,0)));
   }
@@ -927,13 +928,19 @@ SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
   PROTECT(R_ridges = allocVector(VECSXP, nridges));
   nprotect++;
   for(unsigned i=0; i < nridges; i++){
-    SET_VECTOR_ELT(R_ridges, i, RidgeSXP(ridges[i], dim));
+    SEXP ridge;
+    PROTECT(ridge = RidgeSXP(ridges[i], dim));
+    nprotect++;
+    SET_VECTOR_ELT(R_ridges, i, ridge);
   }
 
   PROTECT(R_faces = allocVector(VECSXP, nfaces));
   nprotect++;
   for(unsigned i=0; i < nfaces; i++){
-    SET_VECTOR_ELT(R_faces, i, FaceSXP(faces[i], dim));
+    SEXP face;
+    PROTECT(face = FaceSXP(faces[i], dim));
+    nprotect++;
+    SET_VECTOR_ELT(R_faces, i, face);
   }
 
   PROTECT(out = allocVector(VECSXP, 4));
