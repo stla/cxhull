@@ -1,6 +1,6 @@
-# cxhull 0.1.0.9000
+# cxhull 0.1.1
 
-* Maintenance.
+* Maintenance release.
 
 
 # cxhull 0.1.0

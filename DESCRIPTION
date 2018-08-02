@@ -1,7 +1,7 @@
 Package: cxhull
 Type: Package
 Title: Convex Hull
-Version: 0.1.0.9000
+Version: 0.1.1
 Date: 2018-08-02
 Authors@R: c(
   person("C. B.", "Barber", role="cph", comment="author of the Qhull library"),
