@@ -167,10 +167,21 @@ face:
 ( face_edges <- hull$facets[[1]]$edges )
 ```
 
-One can order the vertices with the help of the `igraph` package as follows:
+One can order the vertices as follows:
 
-```{r, message=FALSE}
-library(igraph)
-g <- graph_from_edgelist(apply(face_edges, 2, as.character))
-biconnected_components(g)$components[[1]]
+```{r}
+polygon <- function(edges){
+  nedges <- nrow(edges)
+  vs <- edges[1,]
+  v <- vs[2]
+  edges <- edges[-1,]
+  for(. in 1:(nedges-2)){
+    j <- which(apply(edges, 1, function(e) v %in% e))
+    v <- edges[j,][which(edges[j,]!=v)]
+    vs <- c(vs,v)
+    edges <- edges[-j,]
+  }
+  vs
+}
+polygon(face_edges)
 ```

@@ -69,16 +69,16 @@ set of points passed to the `cxhull` function. It is given in the field
 hull$vertices[[1]]
 ## $id
 ## [1] 2
-##
+## 
 ## $point
 ## [1] 0 0 0
-##
+## 
 ## $neighvertices
 ## [1] 3 4 6
-##
+## 
 ## $neighridges
 ## [1] 1 2 5
-##
+## 
 ## $neighfacets
 ## [1] 1 2 4
 ```
@@ -116,10 +116,10 @@ The ridges are given as a list:
 hull$ridges[[1]]
 ## $id
 ## [1] 1
-##
+## 
 ## $ridgeOf
 ## [1] 1 4
-##
+## 
 ## $vertices
 ## [1] 2 4
 ```
@@ -134,32 +134,32 @@ Facets are given as a list:
 hull$facets[[1]]
 ## $vertices
 ## [1] 2 4 6 8
-##
+## 
 ## $edges
 ##      [,1] [,2]
 ## [1,]    2    4
 ## [2,]    2    6
 ## [3,]    4    8
 ## [4,]    6    8
-##
+## 
 ## $ridges
 ## [1] 1 2 3 4
-##
+## 
 ## $neighbors
 ## [1] 2 3 4 5
-##
+## 
 ## $volume
 ## [1] 1
-##
+## 
 ## $center
 ## [1] 0.5 0.5 0.0
-##
+## 
 ## $normal
 ## [1]  0  0 -1
-##
+## 
 ## $offset
 ## [1] 0
-##
+## 
 ## $family
 ## [1] NA
 ```
@@ -234,13 +234,22 @@ They are given as `2-4-6-8`. They are not ordered, in the sense that
 ## [4,]    6    8
 ```
 
-One can order the vertices with the help of the `igraph` package as
-follows:
+One can order the vertices as follows:
 
 ``` r
-library(igraph)
-g <- graph_from_edgelist(apply(face_edges, 2, as.character))
-biconnected_components(g)$components[[1]]
-## + 4/4 vertices, named, from 3a8b9aa:
-## [1] 6 8 4 2
+polygon <- function(edges){
+  nedges <- nrow(edges)
+  vs <- edges[1,]
+  v <- vs[2]
+  edges <- edges[-1,]
+  for(. in 1:(nedges-2)){
+    j <- which(apply(edges, 1, function(e) v %in% e))
+    v <- edges[j,][which(edges[j,]!=v)]
+    vs <- c(vs,v)
+    edges <- edges[-j,]
+  }
+  vs
+}
+polygon(face_edges)
+## [1] 2 4 8 6
 ```
