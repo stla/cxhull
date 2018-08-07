@@ -1,6 +1,6 @@
 cxhull
 ================
-2018-06-21
+2018-07-03
 
 The purpose of the `cxhull` package is to compute the convex hull of a
 set of points in arbitrary dimension. It contains only one function:
@@ -253,3 +253,6 @@ polygon <- function(edges){
 polygon(face_edges)
 ## [1] 2 4 8 6
 ```
+
+See a four-dimensional example in [the
+vignette](https://cran.r-project.org/web/packages/cxhull/vignettes/truncated_tesseract.html).

@@ -1,7 +1,7 @@
 ---
 title: "cxhull"
 author: ""
-date: "2018-06-21"
+date: "2018-07-03"
 output:
   github_document:
   html_document:
@@ -185,3 +185,5 @@ polygon <- function(edges){
 }
 polygon(face_edges)
 ```
+
+See a four-dimensional example in [the vignette](https://cran.r-project.org/web/packages/cxhull/vignettes/truncated_tesseract.html). 
