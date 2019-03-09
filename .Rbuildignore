@@ -1,3 +1,7 @@
+^Meta$
+^inst/Meta$
+^doc$
+^inst/doc$
 ^inst/ztemp$
 ^.*\.Rproj$
 ^\.Rproj\.user$

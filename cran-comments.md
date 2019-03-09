@@ -1,7 +1,7 @@
 ## Test environments
 
 * Windows 7, R 3.5.2
-* win-builder (devel and release)
+* win-builder (release)
 
 ## R CMD check results
 
@@ -16,7 +16,3 @@
 
 There are no reverse dependencies.
 
-## Summary
-
-This is a maintenance release. 
-I hopefully fixed the issues raised by the CRAN checks (in the C code).
