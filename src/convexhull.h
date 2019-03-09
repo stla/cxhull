@@ -39,6 +39,7 @@ typedef struct Face {
   double*    center;
   double*    normal;
   double     offset;
+  int        orientation;
   double     area;
   unsigned*  neighbors;
   unsigned   neighborsize;

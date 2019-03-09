@@ -411,6 +411,7 @@ ConvexHullT* convexHull(
           faces[i_facet].normal[i] = normal[i];
         }
         faces[i_facet].offset      = facet->offset;
+        faces[i_facet].orientation = facet->toporient ? -1 : 1;
         faces[i_facet].nvertices   = (unsigned) qh_setsize(qh, facet->vertices);
         { // face vertices
           faces[i_facet].vertices =
@@ -426,8 +427,8 @@ ConvexHullT* convexHull(
               getpoint(points, dim, faces[i_facet].vertices[i_vertex].id);
             i_vertex++;
           }
-          qsort(faces[i_facet].vertices, faces[i_facet].nvertices,
-                sizeof(VertexT), cmpvertices);
+          //qsort(faces[i_facet].vertices, faces[i_facet].nvertices,
+            //    sizeof(VertexT), cmpvertices);
         }
         /*if(dim == 3){ // orientation of the normals
           pointT* onepoint = ((vertexT*)facet->vertices->e[0].p)->point;
@@ -789,7 +790,7 @@ SEXP RidgeSXP(RidgeT ridge, unsigned dim){
 SEXP FaceSXP(FaceT face, unsigned dim){
   unsigned nprotect = 0;
   SEXP R_face, names, vertices, edges, ridges, neighbors, volume, center,
-       normal, offset, family;
+       normal, offset, orientation, family;
 
   unsigned nvertices = face.nvertices;
   PROTECT(vertices = allocVector(INTSXP, nvertices));
@@ -844,7 +845,11 @@ SEXP FaceSXP(FaceT face, unsigned dim){
   nprotect++;
   INTEGER(family)[0] = face.family == -1 ? R_NaInt : face.family;
 
-  PROTECT(R_face = allocVector(VECSXP, 9));
+  PROTECT(orientation = allocVector(INTSXP, 1));
+  nprotect++;
+  INTEGER(orientation)[0] = face.orientation;
+
+  PROTECT(R_face = allocVector(VECSXP, 10));
   nprotect++;
   SET_VECTOR_ELT(R_face, 0, vertices);
   SET_VECTOR_ELT(R_face, 1, edges);
@@ -855,8 +860,9 @@ SEXP FaceSXP(FaceT face, unsigned dim){
   SET_VECTOR_ELT(R_face, 6, normal);
   SET_VECTOR_ELT(R_face, 7, offset);
   SET_VECTOR_ELT(R_face, 8, family);
+  SET_VECTOR_ELT(R_face, 9, orientation);
 
-  PROTECT(names = allocVector(VECSXP, 9));
+  PROTECT(names = allocVector(VECSXP, 10));
   nprotect++;
   SET_VECTOR_ELT(names, 0, mkChar("vertices"));
   SET_VECTOR_ELT(names, 1, mkChar("edges"));
@@ -867,6 +873,7 @@ SEXP FaceSXP(FaceT face, unsigned dim){
   SET_VECTOR_ELT(names, 6, mkChar("normal"));
   SET_VECTOR_ELT(names, 7, mkChar("offset"));
   SET_VECTOR_ELT(names, 8, mkChar("family"));
+  SET_VECTOR_ELT(names, 9, mkChar("orientation"));
   setAttrib(R_face, R_NamesSymbol, names);
 
   UNPROTECT(nprotect);
