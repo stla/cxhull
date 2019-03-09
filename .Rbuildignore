@@ -1,3 +1,4 @@
+^inst/ztemp$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^TODO\.txt$

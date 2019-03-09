@@ -1,7 +1,7 @@
 Package: cxhull
 Type: Package
 Title: Convex Hull
-Version: 0.1.1.9000
+Version: 0.2.0
 Date: 2019-03-09
 Authors@R: c(
   person("C. B.", "Barber", role="cph", comment="author of the Qhull library"),
@@ -14,7 +14,7 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/stla/cxhull
 BugReports: https://github.com/stla/cxhull/issues
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
     rgl
