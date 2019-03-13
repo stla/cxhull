@@ -447,9 +447,7 @@ for(i in 1:nrow(edges)){
 }
 ```
 
-<iframe src="https://laustep.github.io/stlahblog/frames/rgl_truncTesseract1.html" width="100%" height="500px" scrolling="no" frameborder="0">
-
-</iframe>
+[![](https://i.imgur.com/YanOo2u.png)](https://laustep.github.io/stlahblog/frames/rgl_truncTesseract1.html)
 
 Pretty nice.
 
@@ -483,9 +481,7 @@ for(i in 1:nrow(triangles)){
 }
 ```
 
-<iframe src="https://laustep.github.io/stlahblog/frames/rgl_truncTesseract2.html" width="100%" height="500px" scrolling="no" frameborder="0">
-
-</iframe>
+[![](https://i.imgur.com/LtHLYfn.png)](https://laustep.github.io/stlahblog/frames/rgl_truncTesseract2.html)
 
 We could also use different colors for the tetrahedra:
 
@@ -513,6 +509,4 @@ for(i in seq_along(tetrahedra)){
 }
 ```
 
-<iframe src="https://laustep.github.io/stlahblog/frames/rgl_truncTesseract3.html" width="100%" height="500px" scrolling="no" frameborder="0">
-
-</iframe>
+[![](https://i.imgur.com/uewjY5j.png)](https://laustep.github.io/stlahblog/frames/rgl_truncTesseract3.html)
