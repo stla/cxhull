@@ -1,6 +1,6 @@
 cxhull
 ================
-2019-03-09
+2019-03-13
 
 The purpose of the `cxhull` package is to compute the convex hull of a
 set of points in arbitrary dimension. It contains only one function:
@@ -302,5 +302,217 @@ polygon(face_edges)
 ## [1] 2 4 8 6
 ```
 
-See a four-dimensional example in [the
-vignette](https://cran.r-project.org/web/packages/cxhull/vignettes/truncated_tesseract.html).
+# A four-dimensional example
+
+Now, to illustrate the `cxhull` package, we deal with a four-dimensional
+polytope: the *truncated tesseract*.
+
+It is a convex polytope whose vertices are given by all permutations of
+(±1, ±(√2+1), ±(√2+1), ±(√2+1)).
+
+Let’s enter these 64 vertices in a matrix `points`:
+
+``` r
+sqr2p1 <- sqrt(2) + 1
+points <- rbind(
+  c(-1, -sqr2p1, -sqr2p1, -sqr2p1),
+  c(-1, -sqr2p1, -sqr2p1, sqr2p1),
+  c(-1, -sqr2p1, sqr2p1, -sqr2p1),
+  c(-1, -sqr2p1, sqr2p1, sqr2p1),
+  c(-1, sqr2p1, -sqr2p1, -sqr2p1),
+  c(-1, sqr2p1, -sqr2p1, sqr2p1),
+  c(-1, sqr2p1, sqr2p1, -sqr2p1),
+  c(-1, sqr2p1, sqr2p1, sqr2p1),
+  c(1, -sqr2p1, -sqr2p1, -sqr2p1),
+  c(1, -sqr2p1, -sqr2p1, sqr2p1),
+  c(1, -sqr2p1, sqr2p1, -sqr2p1),
+  c(1, -sqr2p1, sqr2p1, sqr2p1),
+  c(1, sqr2p1, -sqr2p1, -sqr2p1),
+  c(1, sqr2p1, -sqr2p1, sqr2p1),
+  c(1, sqr2p1, sqr2p1, -sqr2p1),
+  c(1, sqr2p1, sqr2p1, sqr2p1),
+  c(-sqr2p1, -1, -sqr2p1, -sqr2p1),
+  c(-sqr2p1, -1, -sqr2p1, sqr2p1),
+  c(-sqr2p1, -1, sqr2p1, -sqr2p1),
+  c(-sqr2p1, -1, sqr2p1, sqr2p1),
+  c(-sqr2p1, 1, -sqr2p1, -sqr2p1),
+  c(-sqr2p1, 1, -sqr2p1, sqr2p1),
+  c(-sqr2p1, 1, sqr2p1, -sqr2p1),
+  c(-sqr2p1, 1, sqr2p1, sqr2p1),
+  c(sqr2p1, -1, -sqr2p1, -sqr2p1),
+  c(sqr2p1, -1, -sqr2p1, sqr2p1),
+  c(sqr2p1, -1, sqr2p1, -sqr2p1),
+  c(sqr2p1, -1, sqr2p1, sqr2p1),
+  c(sqr2p1, 1, -sqr2p1, -sqr2p1),
+  c(sqr2p1, 1, -sqr2p1, sqr2p1),
+  c(sqr2p1, 1, sqr2p1, -sqr2p1),
+  c(sqr2p1, 1, sqr2p1, sqr2p1),
+  c(-sqr2p1, -sqr2p1, -1, -sqr2p1),
+  c(-sqr2p1, -sqr2p1, -1, sqr2p1),
+  c(-sqr2p1, -sqr2p1, 1, -sqr2p1),
+  c(-sqr2p1, -sqr2p1, 1, sqr2p1),
+  c(-sqr2p1, sqr2p1, -1, -sqr2p1),
+  c(-sqr2p1, sqr2p1, -1, sqr2p1),
+  c(-sqr2p1, sqr2p1, 1, -sqr2p1),
+  c(-sqr2p1, sqr2p1, 1, sqr2p1),
+  c(sqr2p1, -sqr2p1, -1, -sqr2p1),
+  c(sqr2p1, -sqr2p1, -1, sqr2p1),
+  c(sqr2p1, -sqr2p1, 1, -sqr2p1),
+  c(sqr2p1, -sqr2p1, 1, sqr2p1),
+  c(sqr2p1, sqr2p1, -1, -sqr2p1),
+  c(sqr2p1, sqr2p1, -1, sqr2p1),
+  c(sqr2p1, sqr2p1, 1, -sqr2p1),
+  c(sqr2p1, sqr2p1, 1, sqr2p1),
+  c(-sqr2p1, -sqr2p1, -sqr2p1, -1),
+  c(-sqr2p1, -sqr2p1, -sqr2p1, 1),
+  c(-sqr2p1, -sqr2p1, sqr2p1, -1),
+  c(-sqr2p1, -sqr2p1, sqr2p1, 1),
+  c(-sqr2p1, sqr2p1, -sqr2p1, -1),
+  c(-sqr2p1, sqr2p1, -sqr2p1, 1),
+  c(-sqr2p1, sqr2p1, sqr2p1, -1),
+  c(-sqr2p1, sqr2p1, sqr2p1, 1),
+  c(sqr2p1, -sqr2p1, -sqr2p1, -1),
+  c(sqr2p1, -sqr2p1, -sqr2p1, 1),
+  c(sqr2p1, -sqr2p1, sqr2p1, -1),
+  c(sqr2p1, -sqr2p1, sqr2p1, 1),
+  c(sqr2p1, sqr2p1, -sqr2p1, -1),
+  c(sqr2p1, sqr2p1, -sqr2p1, 1),
+  c(sqr2p1, sqr2p1, sqr2p1, -1),
+  c(sqr2p1, sqr2p1, sqr2p1, 1)
+)
+```
+
+As said before, the truncated tesseract is convex, therefore its convex
+hull is itself. Let’s run the `cxhull` function on its vertices:
+
+``` r
+library(cxhull)
+hull <- cxhull(points)
+str(hull, max = 1)
+## List of 5
+##  $ vertices:List of 64
+##  $ edges   : int [1:128, 1:2] 1 1 1 1 2 2 2 2 3 3 ...
+##  $ ridges  :List of 88
+##  $ facets  :List of 24
+##  $ volume  : num 541
+```
+
+We can observe that `cxhull` has not changed the order of the points:
+
+``` r
+all(names(hull$vertices) == 1:64)
+## [1] TRUE
+```
+
+Let’s look at the cells of the truncated tesseract:
+
+``` r
+table(sapply(hull$facets, function(cell) length(cell$ridges)))
+## 
+##  4 14 
+## 16  8
+```
+
+We see that 16 cells are made of 4 ridges; these cells are tetrahedra.
+We will draw them later, after projecting the truncated tesseract in the
+3D-space.
+
+For now, let’s draw the projected vertices and the edges.
+
+The vertices in the 4D-space lie on the centered sphere with radius
+√(1+3(√2+1)<sup>2</sup>).
+
+Therefore, a stereographic projection is appropriate to project the
+truncated tesseract in the 3D-space.
+
+``` r
+sproj <- function(p, r){
+  c(p[1], p[2], p[3])/(r-p[4])
+}
+ppoints <- t(apply(points, 1, 
+                   function(point) sproj(point, sqrt(1+3*sqr2p1^2))))
+```
+
+Now we are ready to draw the projected vertices and the edges.
+
+``` r
+edges <- hull$edges
+library(rgl)
+open3d(windowRect = c(100,100,600,600))
+view3d(45,45)
+spheres3d(ppoints, radius= 0.07, color = "orange")
+for(i in 1:nrow(edges)){
+  shade3d(cylinder3d(rbind(ppoints[edges[i,1],],ppoints[edges[i,2],]), 
+                     radius = 0.05, sides = 30), col="gold")
+}
+```
+
+<iframe src="https://laustep.github.io/stlahblog/frames/rgl_truncTesseract1.html" width="100%" height="500px" scrolling="no" frameborder="0">
+
+</iframe>
+
+Pretty nice.
+
+Now let’s show the 16 tetrahedra. Their faces correspond to triangular
+ridges. So we get the 64 triangles as
+follows:
+
+``` r
+ridgeSizes <- sapply(hull$ridges, function(ridge) length(ridge$vertices))
+triangles <- t(sapply(hull$ridges[which(ridgeSizes==3)], 
+                      function(ridge) ridge$vertices))
+head(triangles)
+##      [,1] [,2] [,3]
+## [1,]    1   17   33
+## [2,]    1   17   49
+## [3,]    1   33   49
+## [4,]   17   33   49
+## [5,]   12   44   60
+## [6,]   12   28   44
+```
+
+We finally add the triangles:
+
+``` r
+for(i in 1:nrow(triangles)){
+  triangles3d(rbind(
+    ppoints[triangles[i,1],],
+    ppoints[triangles[i,2],],
+    ppoints[triangles[i,3],]),
+    color = "red", alpha = 0.4)
+}
+```
+
+<iframe src="https://laustep.github.io/stlahblog/frames/rgl_truncTesseract2.html" width="100%" height="500px" scrolling="no" frameborder="0">
+
+</iframe>
+
+We could also use different colors for the tetrahedra:
+
+``` r
+open3d(windowRect = c(100,100,600,600))
+view3d(45,45)
+spheres3d(ppoints, radius= 0.07, color = "orange")
+for(i in 1:nrow(edges)){
+  shade3d(cylinder3d(rbind(ppoints[edges[i,1],],ppoints[edges[i,2],]),
+                     radius = 0.05, sides = 30), col="gold")
+}
+cellSizes <- sapply(hull$facets, function(cell) length(cell$ridges))
+tetrahedra <- hull$facets[which(cellSizes == 4)]
+colors <- rainbow(16)
+for(i in seq_along(tetrahedra)){
+  triangles <- tetrahedra[[i]]$ridges
+  for(j in 1:4){
+    triangle <- hull$ridges[[triangles[j]]]$vertices
+    triangles3d(rbind(
+      ppoints[triangle[1],],
+      ppoints[triangle[2],],
+      ppoints[triangle[3],]),
+      color = colors[i], alpha = 0.4)
+  }
+}
+```
+
+<iframe src="https://laustep.github.io/stlahblog/frames/rgl_truncTesseract3.html" width="100%" height="500px" scrolling="no" frameborder="0">
+
+</iframe>

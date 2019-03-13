@@ -1,8 +1,10 @@
+^CRAN-RELEASE$
 ^Meta$
 ^inst/Meta$
 ^doc$
 ^inst/doc$
 ^inst/ztemp$
+^inst/webGL$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^TODO\.txt$
@@ -10,3 +12,4 @@
 ^README\.Rmd$
 ^README\.html$
 ^cran-comments\.md$
+^vignettes$
