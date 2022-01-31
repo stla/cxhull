@@ -178,6 +178,8 @@ EdgesAB <- function(hull){
 #' @param tubesRadius the radius of the tubes when \code{edgesAsTubes=TRUE}
 #' @param spheresRadius the radius of the spheres when 
 #'   \code{verticesAsSpheres=TRUE}
+#' @param spheresColor the color of the spheres when 
+#'   \code{verticesAsSpheres=TRUE}
 #'
 #' @return No value.
 #' @export

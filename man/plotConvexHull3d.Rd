@@ -31,6 +31,9 @@ with the option \code{triangulate=TRUE}}
 
 \item{spheresRadius}{the radius of the spheres when 
 \code{verticesAsSpheres=TRUE}}
+
+\item{spheresColor}{the color of the spheres when 
+\code{verticesAsSpheres=TRUE}}
 }
 \value{
 No value.
