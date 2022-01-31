@@ -82,7 +82,7 @@ VerticesXYZ <- function(hull){
 #' library(rgl)
 #' dodecahedron <- t(dodecahedron3d()$vb[-4L, ])
 #' hull <- cxhull(dodecahedron, triangulate = TRUE)
-#' triangles <- TrianglesXYZ(dodecahedron)
+#' triangles <- TrianglesXYZ(hull)
 #' triangles3d(triangles, color = "firebrick")
 TrianglesXYZ <- function(hull){
   Vertices <- VerticesXYZ(hull)
@@ -122,7 +122,22 @@ TrianglesXYZ <- function(hull){
 #'   is a border edge.
 #' @export
 #'
-#' @examples
+#' @examples library(cxhull)
+#' library(rgl)
+#' dodecahedron <- t(dodecahedron3d()$vb[-4L, ])
+#' hull <- cxhull(dodecahedron, triangulate = TRUE)
+#' triangles <- TrianglesXYZ(hull)
+#' triangles3d(triangles, color = "yellow")
+#' edges <- EdgesAB(hull)
+#' trueEdges <- edges[edges[, 3L] == "yes", c(1L, 2L)]
+#' otherEdges <- edges[edges[, 3L] == "no", c(1L, 2L)]
+#' vertices <- VerticesXYZ(hull)
+#' for(i in 1:nrow(trueEdges)){
+#'   lines3d(vertices[trueEdges[i, ], ], color = "blue", lwd = 3)
+#' }
+#' for(i in 1:nrow(otherEdges)){
+#'   lines3d(vertices[otherEdges[i, ], ], color = "red", lwd = 3)
+#' }
 EdgesAB <- function(hull){
   if(!isTRUE(attr(hull, "3d"))){
     stop("This function is restriced to the 3D case.")

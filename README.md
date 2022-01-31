@@ -1,6 +1,11 @@
 cxhull
 ================
-2019-03-13
+2022-01-31
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/stla/cxhull/workflows/R-CMD-check/badge.svg)](https://github.com/stla/cxhull/actions)
+<!-- badges: end -->
+
 
 The purpose of the `cxhull` package is to compute the convex hull of a
 set of points in arbitrary dimension. It contains only one function:

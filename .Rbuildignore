@@ -13,3 +13,4 @@
 ^README\.html$
 ^cran-comments\.md$
 ^vignettes$
+^\.github$

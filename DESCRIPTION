@@ -14,4 +14,4 @@ Encoding: UTF-8
 Imports: rgl 
 URL: https://github.com/stla/cxhull
 BugReports: https://github.com/stla/cxhull/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.2
