@@ -103,9 +103,8 @@ On 2018-07-30
 /*-<a                             href="qh-user_r.htm#TOC"
   >-------------------------------</a><a name="new_qhull">-</a>
 
-  qh_new_qhull(qh, dim, numpoints, points, ismalloc, qhull_cmd, outfile, errfile )
-    Run qhull and return results in qh.
-    Returns exitcode (0 if no errors).
+  qh_new_qhull(qh, dim, numpoints, points, ismalloc, qhull_cmd, outfile, errfile
+  ) Run qhull and return results in qh. Returns exitcode (0 if no errors).
     Before first call, either call qh_zero(qh, errfile), or set qh to all zero.
 
   notes:
@@ -117,66 +116,78 @@ On 2018-07-30
 
     Default errfile is stderr, outfile may be null
     qhull_cmd must start with "qhull "
-    projects points to a new point array for Delaunay triangulations ('d' and 'v')
-    transforms points into a new point array for halfspace intersection ('H')
+    projects points to a new point array for Delaunay triangulations ('d' and
+  'v') transforms points into a new point array for halfspace intersection ('H')
 
   see:
     Qhull-template at the beginning of this file.
     An example of using qh_new_qhull is user_eg_r.c
 */
-int qh_new_qhull(qhT *qh, int dim, int numpoints, coordT *points, boolT ismalloc,
-                char *qhull_cmd, FILE *outfile, FILE *errfile) {
-  /* gcc may issue a "might be clobbered" warning for dim, points, and ismalloc [-Wclobbered].
-     These parameters are not referenced after a longjmp() and hence not clobbered.
-     See http://stackoverflow.com/questions/7721854/what-sense-do-these-clobbered-variable-warnings-make */
+int qh_new_qhull(qhT* qh,
+                 int dim,
+                 int numpoints,
+                 coordT* points,
+                 boolT ismalloc,
+                 char* qhull_cmd,
+                 FILE* outfile,
+                 FILE* errfile) {
+  /* gcc may issue a "might be clobbered" warning for dim, points, and ismalloc
+     [-Wclobbered]. These parameters are not referenced after a longjmp() and
+     hence not clobbered. See
+     http://stackoverflow.com/questions/7721854/what-sense-do-these-clobbered-variable-warnings-make
+   */
   int exitcode, hulldim;
   boolT new_ismalloc;
-  coordT *new_points;
+  coordT* new_points;
 
-//  if(!errfile){
-//    errfile= stderr;
-//  }
-  if (!qh->qhmem.ferr) {
+  //  if(!errfile){
+  //    errfile= stderr;
+  //  }
+  if(!qh->qhmem.ferr) {
     qh_meminit(qh, errfile);
   } else {
     qh_memcheck(qh);
   }
-  if (strncmp(qhull_cmd, "qhull ", (size_t)6)) {
-    qh_fprintf(qh, errfile, 6186, "qhull error (qh_new_qhull): start qhull_cmd argument with \"qhull \"\n");
+  if(strncmp(qhull_cmd, "qhull ", (size_t)6)) {
+    qh_fprintf(qh, errfile, 6186,
+               "qhull error (qh_new_qhull): start qhull_cmd argument with "
+               "\"qhull \"\n");
     return qh_ERRinput;
   }
   qh_initqhull_start(qh, NULL, outfile, errfile);
-  trace1((qh, qh->ferr, 1044, "qh_new_qhull: build new Qhull for %d %d-d points with %s\n", numpoints, dim, qhull_cmd));
+  trace1((qh, qh->ferr, 1044,
+          "qh_new_qhull: build new Qhull for %d %d-d points with %s\n",
+          numpoints, dim, qhull_cmd));
   exitcode = setjmp(qh->errexit);
-  if (!exitcode)
-  {
+  if(!exitcode) {
     qh->NOerrexit = False;
     qh_initflags(qh, qhull_cmd);
-    if (qh->DELAUNAY)
-      qh->PROJECTdelaunay= True;
-    if (qh->HALFspace) {
+    if(qh->DELAUNAY)
+      qh->PROJECTdelaunay = True;
+    if(qh->HALFspace) {
       /* points is an array of halfspaces,
          the last coordinate of each halfspace is its offset */
-      hulldim= dim-1;
+      hulldim = dim - 1;
       qh_setfeasible(qh, hulldim);
-      new_points= qh_sethalfspace_all(qh, dim, numpoints, points, qh->feasible_point);
-      new_ismalloc= True;
-      if (ismalloc)
+      new_points =
+          qh_sethalfspace_all(qh, dim, numpoints, points, qh->feasible_point);
+      new_ismalloc = True;
+      if(ismalloc)
         qh_free(points);
-    }else {
-      hulldim= dim;
-      new_points= points;
-      new_ismalloc= ismalloc;
+    } else {
+      hulldim = dim;
+      new_points = points;
+      new_ismalloc = ismalloc;
     }
     qh_init_B(qh, new_points, numpoints, hulldim, new_ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    if (outfile) {
+    if(outfile) {
       qh_produce_output(qh);
-    }else {
+    } else {
       qh_prepare_output(qh);
     }
-    if (qh->VERIFYoutput && !qh->STOPpoint && !qh->STOPcone)
+    if(qh->VERIFYoutput && !qh->STOPpoint && !qh->STOPcone)
       qh_check_points(qh);
   }
   qh->NOerrexit = True;
@@ -205,59 +216,66 @@ int qh_new_qhull(qhT *qh, int dim, int numpoints, coordT *points, boolT ismalloc
       print help text for singular data set
     exit program via long jump (if defined) or exit()
 */
-void qh_errexit(qhT *qh, int exitcode, facetT *facet, ridgeT *ridge) {
-
-  if (qh->ERREXITcalled) {
-    qh_fprintf(qh, qh->ferr, 8126, "\nqhull error while processing previous error.  Exit program\n");
+void qh_errexit(qhT* qh, int exitcode, facetT* facet, ridgeT* ridge) {
+  if(qh->ERREXITcalled) {
+    qh_fprintf(
+        qh, qh->ferr, 8126,
+        "\nqhull error while processing previous error.  Exit program\n");
     qh_exit(qh_ERRqhull);
   }
-  qh->ERREXITcalled= True;
-  if (!qh->QHULLfinished)
-    qh->hulltime= qh_CPUclock - qh->hulltime;
+  qh->ERREXITcalled = True;
+  if(!qh->QHULLfinished)
+    qh->hulltime = qh_CPUclock - qh->hulltime;
   qh_errprint(qh, "ERRONEOUS", facet, NULL, ridge, NULL);
-  qh_fprintf(qh, qh->ferr, 8127, "\nWhile executing: %s | %s\n", qh->rbox_command, qh->qhull_command);
-  qh_fprintf(qh, qh->ferr, 8128, "Options selected for Qhull %s:\n%s\n", qh_version, qh->qhull_options);
-  if (qh->furthest_id >= 0) {
-    qh_fprintf(qh, qh->ferr, 8129, "Last point added to hull was p%d.", qh->furthest_id);
-    if (zzval_(Ztotmerge))
-      qh_fprintf(qh, qh->ferr, 8130, "  Last merge was #%d.", zzval_(Ztotmerge));
-    if (qh->QHULLfinished)
-      qh_fprintf(qh, qh->ferr, 8131, "\nQhull has finished constructing the hull.");
-    else if (qh->POSTmerging)
+  qh_fprintf(qh, qh->ferr, 8127, "\nWhile executing: %s | %s\n",
+             qh->rbox_command, qh->qhull_command);
+  qh_fprintf(qh, qh->ferr, 8128, "Options selected for Qhull %s:\n%s\n",
+             qh_version, qh->qhull_options);
+  if(qh->furthest_id >= 0) {
+    qh_fprintf(qh, qh->ferr, 8129, "Last point added to hull was p%d.",
+               qh->furthest_id);
+    if(zzval_(Ztotmerge))
+      qh_fprintf(qh, qh->ferr, 8130, "  Last merge was #%d.",
+                 zzval_(Ztotmerge));
+    if(qh->QHULLfinished)
+      qh_fprintf(qh, qh->ferr, 8131,
+                 "\nQhull has finished constructing the hull.");
+    else if(qh->POSTmerging)
       qh_fprintf(qh, qh->ferr, 8132, "\nQhull has started post-merging.");
     qh_fprintf(qh, qh->ferr, 8133, "\n");
   }
-  if (qh->FORCEoutput && (qh->QHULLfinished || (!facet && !ridge)))
+  if(qh->FORCEoutput && (qh->QHULLfinished || (!facet && !ridge)))
     qh_produce_output(qh);
-  else if (exitcode != qh_ERRinput) {
-    if (exitcode != qh_ERRsingular && zzval_(Zsetplane) > qh->hull_dim+1) {
+  else if(exitcode != qh_ERRinput) {
+    if(exitcode != qh_ERRsingular && zzval_(Zsetplane) > qh->hull_dim + 1) {
       qh_fprintf(qh, qh->ferr, 8134, "\nAt error exit:\n");
       qh_printsummary(qh, qh->ferr);
-      if (qh->PRINTstatistics) {
+      if(qh->PRINTstatistics) {
         qh_collectstatistics(qh);
         qh_printstatistics(qh, qh->ferr, "at error exit");
         qh_memstatistics(qh, qh->ferr);
       }
     }
-    if (qh->PRINTprecision)
+    if(qh->PRINTprecision)
       qh_printstats(qh, qh->ferr, qh->qhstat.precision, NULL);
   }
-  if (!exitcode)
-    exitcode= qh_ERRqhull;
-  else if (exitcode == qh_ERRsingular)
+  if(!exitcode)
+    exitcode = qh_ERRqhull;
+  else if(exitcode == qh_ERRsingular)
     qh_printhelp_singular(qh, qh->ferr);
-  else if (exitcode == qh_ERRprec && !qh->PREmerge)
+  else if(exitcode == qh_ERRprec && !qh->PREmerge)
     qh_printhelp_degenerate(qh, qh->ferr);
-  if (qh->NOerrexit) {
-    qh_fprintf(qh, qh->ferr, 6187, "qhull error while ending program, or qh->NOerrexit not cleared after setjmp(). Exit program with error.\n");
+  if(qh->NOerrexit) {
+    qh_fprintf(qh, qh->ferr, 6187,
+               "qhull error while ending program, or qh->NOerrexit not cleared "
+               "after setjmp(). Exit program with error.\n");
     qh_exit(qh_ERRqhull);
   }
-  qh->ERREXITcalled= False;
-  qh->NOerrexit= True;
-  qh->ALLOWrestart= False;  /* longjmp will undo qh_build_withrestart */
+  qh->ERREXITcalled = False;
+  qh->NOerrexit = True;
+  qh->ALLOWrestart = False; /* longjmp will undo qh_build_withrestart */
   longjmp(qh->errexit, exitcode);
 } /* errexit */
-
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >-------------------------------</a><a name="errprint">-</a>
@@ -269,42 +287,48 @@ void qh_errexit(qhT *qh, int exitcode, facetT *facet, ridgeT *ridge) {
   notes:
     except for string, any parameter may be NULL
 */
-void qh_errprint(qhT *qh, const char *string, facetT *atfacet, facetT *otherfacet, ridgeT *atridge, vertexT *atvertex) {
+void qh_errprint(qhT* qh,
+                 const char* string,
+                 facetT* atfacet,
+                 facetT* otherfacet,
+                 ridgeT* atridge,
+                 vertexT* atvertex) {
   int i;
 
-  if (atfacet) {
+  if(atfacet) {
     qh_fprintf(qh, qh->ferr, 8135, "%s FACET:\n", string);
     qh_printfacet(qh, qh->ferr, atfacet);
   }
-  if (otherfacet) {
+  if(otherfacet) {
     qh_fprintf(qh, qh->ferr, 8136, "%s OTHER FACET:\n", string);
     qh_printfacet(qh, qh->ferr, otherfacet);
   }
-  if (atridge) {
+  if(atridge) {
     qh_fprintf(qh, qh->ferr, 8137, "%s RIDGE:\n", string);
     qh_printridge(qh, qh->ferr, atridge);
-    if (atridge->top && atridge->top != atfacet && atridge->top != otherfacet)
+    if(atridge->top && atridge->top != atfacet && atridge->top != otherfacet)
       qh_printfacet(qh, qh->ferr, atridge->top);
-    if (atridge->bottom
-        && atridge->bottom != atfacet && atridge->bottom != otherfacet)
+    if(atridge->bottom && atridge->bottom != atfacet &&
+       atridge->bottom != otherfacet)
       qh_printfacet(qh, qh->ferr, atridge->bottom);
-    if (!atfacet)
-      atfacet= atridge->top;
-    if (!otherfacet)
-      otherfacet= otherfacet_(atridge, atfacet);
+    if(!atfacet)
+      atfacet = atridge->top;
+    if(!otherfacet)
+      otherfacet = otherfacet_(atridge, atfacet);
   }
-  if (atvertex) {
+  if(atvertex) {
     qh_fprintf(qh, qh->ferr, 8138, "%s VERTEX:\n", string);
     qh_printvertex(qh, qh->ferr, atvertex);
   }
-  if (qh->fout && qh->FORCEoutput && atfacet && !qh->QHULLfinished && !qh->IStracing) {
-    qh_fprintf(qh, qh->ferr, 8139, "ERRONEOUS and NEIGHBORING FACETS to output\n");
-    for (i=0; i < qh_PRINTEND; i++)  /* use fout for geomview output */
+  if(qh->fout && qh->FORCEoutput && atfacet && !qh->QHULLfinished &&
+     !qh->IStracing) {
+    qh_fprintf(qh, qh->ferr, 8139,
+               "ERRONEOUS and NEIGHBORING FACETS to output\n");
+    for(i = 0; i < qh_PRINTEND; i++) /* use fout for geomview output */
       qh_printneighborhood(qh, qh->fout, qh->PRINTout[i], atfacet, otherfacet,
-                            !qh_ALL);
+                           !qh_ALL);
   }
 } /* errprint */
-
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >-------------------------------</a><a name="printfacetlist">-</a>
@@ -317,17 +341,19 @@ void qh_errprint(qhT *qh, const char *string, facetT *atfacet, facetT *otherface
   notes:
     also prints all vertices
 */
-void qh_printfacetlist(qhT *qh, facetT *facetlist, setT *facets, boolT printall) {
+void qh_printfacetlist(qhT* qh,
+                       facetT* facetlist,
+                       setT* facets,
+                       boolT printall) {
   facetT *facet, **facetp;
 
   qh_printbegin(qh, qh->ferr, qh_PRINTfacets, facetlist, facets, printall);
   FORALLfacet_(facetlist)
-    qh_printafacet(qh, qh->ferr, qh_PRINTfacets, facet, printall);
+      qh_printafacet(qh, qh->ferr, qh_PRINTfacets, facet, printall);
   FOREACHfacet_(facets)
-    qh_printafacet(qh, qh->ferr, qh_PRINTfacets, facet, printall);
+      qh_printafacet(qh, qh->ferr, qh_PRINTfacets, facet, printall);
   qh_printend(qh, qh->ferr, qh_PRINTfacets, facetlist, facets, printall);
 } /* printfacetlist */
-
 
 /*-<a                             href="qh-io_r.htm#TOC"
   >-------------------------------</a><a name="printhelp_degenerate">-</a>
@@ -338,15 +364,16 @@ void qh_printfacetlist(qhT *qh, facetT *facetlist, setT *facets, boolT printall)
   notes:
     no message if qh_QUICKhelp
 */
-void qh_printhelp_degenerate(qhT *qh, FILE *fp) {
-
-  if (qh->MERGEexact || qh->PREmerge || qh->JOGGLEmax < REALmax/2)
-    qh_fprintf(qh, fp, 9368, "\n\
+void qh_printhelp_degenerate(qhT* qh, FILE* fp) {
+  if(qh->MERGEexact || qh->PREmerge || qh->JOGGLEmax < REALmax / 2)
+    qh_fprintf(qh, fp, 9368,
+               "\n\
 A Qhull error has occurred.  Qhull should have corrected the above\n\
 precision error.  Please send the input and all of the output to\n\
 qhull_bug@qhull.org\n");
-  else if (!qh_QUICKhelp) {
-    qh_fprintf(qh, fp, 9369, "\n\
+  else if(!qh_QUICKhelp) {
+    qh_fprintf(qh, fp, 9369,
+               "\n\
 Precision problems were detected during construction of the convex hull.\n\
 This occurs because convex hull algorithms assume that calculations are\n\
 exact, but floating-point arithmetic has roundoff errors.\n\
@@ -362,23 +389,27 @@ Qhull may produce a ridge with four neighbors or two facets with the same \n\
 vertices.  Qhull reports these events when they occur.  It stops when a\n\
 concave ridge, flipped facet, or duplicate facet occurs.\n");
 #if REALfloat
-    qh_fprintf(qh, fp, 9370, "\
+    qh_fprintf(qh, fp, 9370,
+               "\
 \n\
 Qhull is currently using single precision arithmetic.  The following\n\
 will probably remove the precision problems:\n\
   - recompile qhull for realT precision(#define REALfloat 0 in user.h).\n");
 #endif
-    if (qh->DELAUNAY && !qh->SCALElast && qh->MAXabs_coord > 1e4)
-      qh_fprintf(qh, fp, 9371, "\
+    if(qh->DELAUNAY && !qh->SCALElast && qh->MAXabs_coord > 1e4)
+      qh_fprintf(qh, fp, 9371,
+                 "\
 \n\
 When computing the Delaunay triangulation of coordinates > 1.0,\n\
   - use 'Qbb' to scale the last coordinate to [0,m] (max previous coordinate)\n");
-    if (qh->DELAUNAY && !qh->ATinfinity)
-      qh_fprintf(qh, fp, 9372, "\
+    if(qh->DELAUNAY && !qh->ATinfinity)
+      qh_fprintf(qh, fp, 9372,
+                 "\
 When computing the Delaunay triangulation:\n\
   - use 'Qz' to add a point at-infinity.  This reduces precision problems.\n");
 
-    qh_fprintf(qh, fp, 9373, "\
+    qh_fprintf(qh, fp, 9373,
+               "\
 \n\
 If you need triangular output:\n\
   - use option 'Qt' to triangulate the output\n\
@@ -393,7 +424,8 @@ try one or more of the following options.  They can not guarantee an output.\n\
   - use 'En' to specify a maximum roundoff error less than %2.2g.\n\
   - options 'Qf', 'Qbb', and 'QR0' may also help\n",
                qh->DISTround);
-    qh_fprintf(qh, fp, 9374, "\
+    qh_fprintf(qh, fp, 9374,
+               "\
 \n\
 To guarantee simplicial output:\n\
   - use option 'Qt' to triangulate the output\n\
@@ -403,7 +435,6 @@ To guarantee simplicial output:\n\
 ");
   }
 } /* printhelp_degenerate */
-
 
 /*-<a                             href="qh-globa_r.htm#TOC"
   >-------------------------------</a><a name="printhelp_narrowhull">-</a>
@@ -415,15 +446,16 @@ To guarantee simplicial output:\n\
     Alternatively, reduce qh_WARNnarrow in user.h
 
 */
-void qh_printhelp_narrowhull(qhT *qh, FILE *fp, realT minangle) {
-
-    qh_fprintf(qh, fp, 9375, "qhull precision warning: \n\
+void qh_printhelp_narrowhull(qhT* qh, FILE* fp, realT minangle) {
+  qh_fprintf(qh, fp, 9375,
+             "qhull precision warning: \n\
 The initial hull is narrow (cosine of min. angle is %.16f).\n\
 Is the input lower dimensional (e.g., on a plane in 3-d)?  Qhull may\n\
 produce a wide facet.  Options 'QbB' (scale to unit box) or 'Qbb' (scale\n\
 last coordinate) may remove this warning.  Use 'Pp' to skip this warning.\n\
 See 'Limitations' in qh-impre.htm.\n",
-          -minangle);   /* convert from angle between normals to angle between facets */
+             -minangle); /* convert from angle between normals to angle between
+                            facets */
 } /* printhelp_narrowhull */
 
 /*-<a                             href="qh-io_r.htm#TOC"
@@ -432,62 +464,73 @@ See 'Limitations' in qh-impre.htm.\n",
   qh_printhelp_singular(qh, fp )
     prints descriptive message for singular input
 */
-void qh_printhelp_singular(qhT *qh, FILE *fp) {
-  facetT *facet;
+void qh_printhelp_singular(qhT* qh, FILE* fp) {
+  facetT* facet;
   vertexT *vertex, **vertexp;
   realT min, max, *coord, dist;
-  int i,k;
+  int i, k;
 
-  qh_fprintf(qh, fp, 9376, "\n\
+  qh_fprintf(qh, fp, 9376,
+             "\n\
 The input to qhull appears to be less than %d dimensional, or a\n\
 computation has overflowed.\n\n\
 Qhull could not construct a clearly convex simplex from points:\n",
-           qh->hull_dim);
+             qh->hull_dim);
   qh_printvertexlist(qh, fp, "", qh->facet_list, NULL, qh_ALL);
-  if (!qh_QUICKhelp)
-    qh_fprintf(qh, fp, 9377, "\n\
+  if(!qh_QUICKhelp)
+    qh_fprintf(qh, fp, 9377,
+               "\n\
 The center point is coplanar with a facet, or a vertex is coplanar\n\
 with a neighboring facet.  The maximum round off error for\n\
 computing distances is %2.2g.  The center point, facets and distances\n\
-to the center point are as follows:\n\n", qh->DISTround);
-  qh_printpointid(qh, fp, "center point", qh->hull_dim, qh->interior_point, qh_IDunknown);
+to the center point are as follows:\n\n",
+               qh->DISTround);
+  qh_printpointid(qh, fp, "center point", qh->hull_dim, qh->interior_point,
+                  qh_IDunknown);
   qh_fprintf(qh, fp, 9378, "\n");
   FORALLfacets {
     qh_fprintf(qh, fp, 9379, "facet");
     FOREACHvertex_(facet->vertices)
-      qh_fprintf(qh, fp, 9380, " p%d", qh_pointid(qh, vertex->point));
+        qh_fprintf(qh, fp, 9380, " p%d", qh_pointid(qh, vertex->point));
     zinc_(Zdistio);
     qh_distplane(qh, qh->interior_point, facet, &dist);
     qh_fprintf(qh, fp, 9381, " distance= %4.2g\n", dist);
   }
-  if (!qh_QUICKhelp) {
-    if (qh->HALFspace)
-      qh_fprintf(qh, fp, 9382, "\n\
+  if(!qh_QUICKhelp) {
+    if(qh->HALFspace)
+      qh_fprintf(qh, fp, 9382,
+                 "\n\
 These points are the dual of the given halfspaces.  They indicate that\n\
 the intersection is degenerate.\n");
-    qh_fprintf(qh, fp, 9383,"\n\
+    qh_fprintf(qh, fp, 9383,
+               "\n\
 These points either have a maximum or minimum x-coordinate, or\n\
 they maximize the determinant for k coordinates.  Trial points\n\
 are first selected from points that maximize a coordinate.\n");
-    if (qh->hull_dim >= qh_INITIALmax)
-      qh_fprintf(qh, fp, 9384, "\n\
+    if(qh->hull_dim >= qh_INITIALmax)
+      qh_fprintf(qh, fp, 9384,
+                 "\n\
 Because of the high dimension, the min x-coordinate and max-coordinate\n\
 points are used if the determinant is non-zero.  Option 'Qs' will\n\
 do a better, though much slower, job.  Instead of 'Qs', you can change\n\
 the points by randomly rotating the input with 'QR0'.\n");
   }
-  qh_fprintf(qh, fp, 9385, "\nThe min and max coordinates for each dimension are:\n");
-  for (k=0; k < qh->hull_dim; k++) {
-    min= REALmax;
-    max= -REALmin;
-    for (i=qh->num_points, coord= qh->first_point+k; i--; coord += qh->hull_dim) {
+  qh_fprintf(qh, fp, 9385,
+             "\nThe min and max coordinates for each dimension are:\n");
+  for(k = 0; k < qh->hull_dim; k++) {
+    min = REALmax;
+    max = -REALmin;
+    for(i = qh->num_points, coord = qh->first_point + k; i--;
+        coord += qh->hull_dim) {
       maximize_(max, *coord);
       minimize_(min, *coord);
     }
-    qh_fprintf(qh, fp, 9386, "  %d:  %8.4g  %8.4g  difference= %4.4g\n", k, min, max, max-min);
+    qh_fprintf(qh, fp, 9386, "  %d:  %8.4g  %8.4g  difference= %4.4g\n", k, min,
+               max, max - min);
   }
-  if (!qh_QUICKhelp) {
-    qh_fprintf(qh, fp, 9387, "\n\
+  if(!qh_QUICKhelp) {
+    qh_fprintf(qh, fp, 9387,
+               "\n\
 If the input should be full dimensional, you have several options that\n\
 may determine an initial simplex:\n\
   - use 'QJ'  to joggle the input and make it full dimensional\n\
@@ -496,12 +539,14 @@ may determine an initial simplex:\n\
   - use 'Qs'  to search all points for the initial simplex\n\
   - use 'En'  to specify a maximum roundoff error less than %2.2g.\n\
   - trace execution with 'T3' to see the determinant for each point.\n",
-                     qh->DISTround);
+               qh->DISTround);
 #if REALfloat
-    qh_fprintf(qh, fp, 9388, "\
+    qh_fprintf(qh, fp, 9388,
+               "\
   - recompile qhull for realT precision(#define REALfloat 0 in libqhull_r.h).\n");
 #endif
-    qh_fprintf(qh, fp, 9389, "\n\
+    qh_fprintf(qh, fp, 9389,
+               "\n\
 If the input is lower dimensional:\n\
   - use 'QJ' to joggle the input and make it full dimensional\n\
   - use 'Qbk:0Bk:0' to delete coordinate k from the input.  You should\n\
@@ -523,8 +568,7 @@ If the input is lower dimensional:\n\
   notes:
     increase maximum number of allocations in qh_initqhull_mem()
 */
-void qh_user_memsizes(qhT *qh) {
-
+void qh_user_memsizes(qhT* qh) {
   QHULL_UNUSED(qh)
   /* qh_memsize(qh, size); */
 } /* user_memsizes */

@@ -3,34 +3,34 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 #define qh_QHimport
-#include "qhull_ra.h"
 #include "convexhull.h"
+#include "qhull_ra.h"
 #include "utils.h"
 
 // to use the qsort function - sort vertices according to their ids ------------
-int cmpvertices (const void * a, const void * b) {
-   return ( (*((VertexT*)a)).id - (*((VertexT*)b)).id );
+int cmpvertices(const void* a, const void* b) {
+  return ((*((VertexT*)a)).id - (*((VertexT*)b)).id);
 }
 // - sort full vertices --------------------------------------------------------
-int cmpfullvertices (const void * a, const void * b) {
-  return ( (*((FullVertexT*)a)).id - (*((FullVertexT*)b)).id );
+int cmpfullvertices(const void* a, const void* b) {
+  return ((*((FullVertexT*)a)).id - (*((FullVertexT*)b)).id);
 }
 // - sort edges ----------------------------------------------------------------
-int cmpedges (const void * a, const void * b) {
-  if((*(unsigned**)a)[0] > (*(unsigned**)b)[0]){
+int cmpedges(const void* a, const void* b) {
+  if((*(unsigned**)a)[0] > (*(unsigned**)b)[0]) {
     return 1;
-  }else if((*(unsigned**)a)[0] == (*(unsigned**)b)[0]){
+  } else if((*(unsigned**)a)[0] == (*(unsigned**)b)[0]) {
     return (*(unsigned**)a)[1] - (*(unsigned**)b)[1];
-  }else{
+  } else {
     return -1;
   }
 }
 
 // test equality of two _sorted_ arrays ----------------------------------------
-unsigned equalarraysu(unsigned* array1, unsigned* array2, unsigned length){
+unsigned equalarraysu(unsigned* array1, unsigned* array2, unsigned length) {
   unsigned i;
-  for(i=0; i < length; i++){
-    if(array1[i] != array2[i]){
+  for(i = 0; i < length; i++) {
+    if(array1[i] != array2[i]) {
       break;
     }
   }
@@ -38,35 +38,35 @@ unsigned equalarraysu(unsigned* array1, unsigned* array2, unsigned length){
 }
 
 // return ids of a vector of VertexT -------------------------------------------
-unsigned* map_vertexid(VertexT* vertices, unsigned nvertices){
+unsigned* map_vertexid(VertexT* vertices, unsigned nvertices) {
   unsigned* ids = malloc(nvertices * sizeof(unsigned));
-  for(unsigned v=0; v < nvertices; v++){
+  for(unsigned v = 0; v < nvertices; v++) {
     ids[v] = vertices[v].id;
   }
   return ids;
 }
 
 // return ids of a vector of RidgeT --------------------------------------------
-unsigned* map_ridgeid(RidgeT* ridges, unsigned nridges){
+unsigned* map_ridgeid(RidgeT* ridges, unsigned nridges) {
   unsigned* ids = malloc(nridges * sizeof(unsigned));
-  for(unsigned r=0; r < nridges; r++){
+  for(unsigned r = 0; r < nridges; r++) {
     ids[r] = ridges[r].id;
   }
   return ids;
 }
 
 // deep copy of a ridge --------------------------------------------------------
-RidgeT copyRidge(RidgeT ridge, unsigned dim){
+RidgeT copyRidge(RidgeT ridge, unsigned dim) {
   RidgeT out;
-  out.ridgeOf1  = ridge.ridgeOf1;
-  out.ridgeOf2  = ridge.ridgeOf2;
+  out.ridgeOf1 = ridge.ridgeOf1;
+  out.ridgeOf2 = ridge.ridgeOf2;
   out.nvertices = ridge.nvertices;
-  out.nedges    = ridge.nedges;
-  out.vertices  = malloc(out.nvertices * sizeof(VertexT));
-  for(unsigned v=0; v < out.nvertices; v++){
-    out.vertices[v].id    = ridge.vertices[v].id;
+  out.nedges = ridge.nedges;
+  out.vertices = malloc(out.nvertices * sizeof(VertexT));
+  for(unsigned v = 0; v < out.nvertices; v++) {
+    out.vertices[v].id = ridge.vertices[v].id;
     out.vertices[v].point = malloc(dim * sizeof(double));
-    for(unsigned i=0; i < dim; i++){
+    for(unsigned i = 0; i < dim; i++) {
       out.vertices[v].point[i] = ridge.vertices[v].point[i];
     }
   }
@@ -81,17 +81,17 @@ RidgeT copyRidge(RidgeT ridge, unsigned dim){
 }
 
 // append to a vector of VertexT -----------------------------------------------
-void appendv(VertexT x, VertexT** array, unsigned length, unsigned* flag){
+void appendv(VertexT x, VertexT** array, unsigned length, unsigned* flag) {
   *flag = 1;
-  for(unsigned i=0; i < length; i++){
-    if(x.id == (*(*array + i)).id){
+  for(unsigned i = 0; i < length; i++) {
+    if(x.id == (*(*array + i)).id) {
       *flag = 0;
       break;
     }
   }
-  if(*flag == 1){
-    *array = realloc(*array, (length+1) * sizeof(VertexT));
-    if(*array == NULL){
+  if(*flag == 1) {
+    *array = realloc(*array, (length + 1) * sizeof(VertexT));
+    if(*array == NULL) {
       error("realloc failure - exiting\n");
     }
     *(*array + length) = x;
@@ -99,12 +99,16 @@ void appendv(VertexT x, VertexT** array, unsigned length, unsigned* flag){
 }
 
 // union of two vectors of VertexT ---------------------------------------------
-void unionv(VertexT** vs1, VertexT* vs2, unsigned l1, unsigned l2, unsigned* l){
+void unionv(VertexT** vs1,
+            VertexT* vs2,
+            unsigned l1,
+            unsigned l2,
+            unsigned* l) {
   *l = l1;
-  for(unsigned v=0; v < l2; v++){
+  for(unsigned v = 0; v < l2; v++) {
     unsigned pushed;
     appendv(vs2[v], vs1, *l, &pushed);
-    if(pushed){
+    if(pushed) {
       (*l)++;
     }
   }
@@ -113,67 +117,68 @@ void unionv(VertexT** vs1, VertexT* vs2, unsigned l1, unsigned l2, unsigned* l){
 }
 
 // merge ridges with same ridgeOf's --------------------------------------------
-RidgeT* mergeRidges(RidgeT* ridges, unsigned nridges, unsigned* newlength){
+RidgeT* mergeRidges(RidgeT* ridges, unsigned nridges, unsigned* newlength) {
   // http://www.c4learn.com/c-programs/to-delete-duplicate-elements-in-array.html
   *newlength = nridges;
-  unsigned i,j,k;
-  for(i = 0; i < nridges; i++){
-    for(j = i+1; j < nridges; ){
+  unsigned i, j, k;
+  for(i = 0; i < nridges; i++) {
+    for(j = i + 1; j < nridges;) {
       if(ridges[i].ridgeOf1 == ridges[j].ridgeOf1 &&
-         ridges[i].ridgeOf2 == ridges[j].ridgeOf2)
-      {
+         ridges[i].ridgeOf2 == ridges[j].ridgeOf2) {
         unsigned l;
-        unionv(&(ridges[i].vertices), ridges[j].vertices,
-                 ridges[i].nvertices, ridges[j].nvertices, &l);
+        unionv(&(ridges[i].vertices), ridges[j].vertices, ridges[i].nvertices,
+               ridges[j].nvertices, &l);
         ridges[i].nvertices = l;
         (*newlength)--;
-        for(k = j; k+1 < nridges; k++){
-          ridges[k] = ridges[k+1];
+        for(k = j; k + 1 < nridges; k++) {
+          ridges[k] = ridges[k + 1];
         }
         nridges--;
-      }else{
+      } else {
         j++;
       }
     }
   }
   RidgeT* out = malloc(*newlength * sizeof(RidgeT));
-  for(unsigned r=0; r < *newlength; r++){
+  for(unsigned r = 0; r < *newlength; r++) {
     out[r] = ridges[r];
   }
   return out;
 }
 
 // all ridges from the ridges stored in the faces ------------------------------
-RidgeT* allRidges(FaceT *faces, unsigned nfaces, unsigned dim,
-                  unsigned* length){
+RidgeT* allRidges(FaceT* faces,
+                  unsigned nfaces,
+                  unsigned dim,
+                  unsigned* length) {
   RidgeT* out = malloc(faces[0].nridges * sizeof(RidgeT));
-  for(unsigned i=0; i < faces[0].nridges; i++){
+  for(unsigned i = 0; i < faces[0].nridges; i++) {
     out[i] = copyRidge(faces[0].ridges[i], dim);
     out[i].id = i;
     out[i].nedges = 0;
   }
-  *length    = faces[0].nridges;
+  *length = faces[0].nridges;
   unsigned n = faces[0].nridges;
-  for(unsigned f=1; f < nfaces; f++){
-    for(unsigned j=0; j < faces[f].nridges; j++){
+  for(unsigned f = 1; f < nfaces; f++) {
+    for(unsigned j = 0; j < faces[f].nridges; j++) {
       unsigned count = 0;
-      for(unsigned i=0; i < n; i++){
+      for(unsigned i = 0; i < n; i++) {
         unsigned flag = 0;
-        for(unsigned v=0; v < faces[f].ridges[j].nvertices; v++){
-          if(faces[f].ridges[j].vertices[v].id != out[i].vertices[v].id){
+        for(unsigned v = 0; v < faces[f].ridges[j].nvertices; v++) {
+          if(faces[f].ridges[j].vertices[v].id != out[i].vertices[v].id) {
             flag = 1;
             break;
           }
         }
-        if(flag){
+        if(flag) {
           count++;
-        }else{
+        } else {
           break;
         }
       }
-      if(count == n){
-        out = realloc(out, (*length+1) * sizeof(RidgeT));
-        if(out == NULL){
+      if(count == n) {
+        out = realloc(out, (*length + 1) * sizeof(RidgeT));
+        if(out == NULL) {
           error("realloc failure - exiting\n");
         }
         out[*length] = copyRidge(faces[f].ridges[j], dim);
@@ -188,19 +193,19 @@ RidgeT* allRidges(FaceT *faces, unsigned nfaces, unsigned dim,
 }
 
 // assign ids to the ridges stored in the faces --------------------------------
-void assignRidgesIds(FaceT** faces, unsigned nfaces, RidgeT* allridges,
-                     unsigned nallridges)
-{
-  for(unsigned f=0; f < nfaces; f++){
-    for(unsigned fr=0; fr < (*(*faces + f)).nridges; fr++){
-      for(unsigned r=0; r < nallridges; r++){
+void assignRidgesIds(FaceT** faces,
+                     unsigned nfaces,
+                     RidgeT* allridges,
+                     unsigned nallridges) {
+  for(unsigned f = 0; f < nfaces; f++) {
+    for(unsigned fr = 0; fr < (*(*faces + f)).nridges; fr++) {
+      for(unsigned r = 0; r < nallridges; r++) {
         if((allridges[r].nvertices == (*(*faces + f)).ridges[fr].nvertices) &&
-            equalarraysu(map_vertexid(allridges[r].vertices,
-                                      allridges[r].nvertices),
-                         map_vertexid((*(*faces + f)).ridges[fr].vertices,
-                                      allridges[r].nvertices),
-                         allridges[r].nvertices))
-        {
+           equalarraysu(
+               map_vertexid(allridges[r].vertices, allridges[r].nvertices),
+               map_vertexid((*(*faces + f)).ridges[fr].vertices,
+                            allridges[r].nvertices),
+               allridges[r].nvertices)) {
           (*(*faces + f)).ridges[fr].id = allridges[r].id;
           break;
         }
@@ -210,39 +215,41 @@ void assignRidgesIds(FaceT** faces, unsigned nfaces, RidgeT* allridges,
 }
 
 // the threshold distance to detect neighbor vertices --------------------------
-double ridgeMaxDistance(RidgeT ridge, unsigned v, unsigned dim){
-  double dists[ridge.nvertices-1];
+double ridgeMaxDistance(RidgeT ridge, unsigned v, unsigned dim) {
+  double dists[ridge.nvertices - 1];
   unsigned count = 0;
-  for(unsigned w=0; w < ridge.nvertices; w++){
-    if(w != v){
+  for(unsigned w = 0; w < ridge.nvertices; w++) {
+    if(w != v) {
       dists[count] = squaredDistance(ridge.vertices[v].point,
                                      ridge.vertices[w].point, dim);
       count++;
     }
   }
-  qsort(dists, ridge.nvertices-1, sizeof(double), cmpfuncdbl);
+  qsort(dists, ridge.nvertices - 1, sizeof(double), cmpfuncdbl);
   return dists[1];
 }
 
 // neighbor vertices of a vertex from all ridges, for dim>2 --------------------
-unsigned* neighVertices(unsigned id, RidgeT* allridges, unsigned nridges,
-                        unsigned dim, unsigned triangulate, unsigned* lengthout)
-{
+unsigned* neighVertices(unsigned id,
+                        RidgeT* allridges,
+                        unsigned nridges,
+                        unsigned dim,
+                        unsigned triangulate,
+                        unsigned* lengthout) {
   unsigned* neighs = malloc(0);
   *lengthout = 0;
-  for(unsigned e=0; e < nridges; e++){
-    for(unsigned v=0; v < allridges[e].nvertices; v++){
-      if(id == allridges[e].vertices[v].id){
-        for(unsigned w=0; w < allridges[e].nvertices; w++){
+  for(unsigned e = 0; e < nridges; e++) {
+    for(unsigned v = 0; v < allridges[e].nvertices; v++) {
+      if(id == allridges[e].vertices[v].id) {
+        for(unsigned w = 0; w < allridges[e].nvertices; w++) {
           // for dim 3 needless: only two connected vertices
           if(w != v && (triangulate || dim == 3 ||
-             squaredDistance(allridges[e].vertices[w].point,
-                             allridges[e].vertices[v].point, dim) <=
-              ridgeMaxDistance(allridges[e], v, dim)))
-          {
+                        squaredDistance(allridges[e].vertices[w].point,
+                                        allridges[e].vertices[v].point, dim) <=
+                            ridgeMaxDistance(allridges[e], v, dim))) {
             unsigned pushed;
             appendu(allridges[e].vertices[w].id, &neighs, *lengthout, &pushed);
-            if(pushed){
+            if(pushed) {
               (*lengthout)++;
             }
           }
@@ -255,22 +262,23 @@ unsigned* neighVertices(unsigned id, RidgeT* allridges, unsigned nridges,
 }
 
 // neighbor ridges of a vertex -------------------------------------------------
-unsigned* neighRidges(unsigned id, RidgeT* allridges, unsigned nridges,
-                     unsigned* length)
-{
+unsigned* neighRidges(unsigned id,
+                      RidgeT* allridges,
+                      unsigned nridges,
+                      unsigned* length) {
   unsigned* neighs = malloc(0);
   *length = 0;
-  for(unsigned e=0; e < nridges; e++){
+  for(unsigned e = 0; e < nridges; e++) {
     unsigned flag = 0;
-    for(unsigned v=0; v < allridges[e].nvertices; v++){
-      if(id == allridges[e].vertices[v].id){
+    for(unsigned v = 0; v < allridges[e].nvertices; v++) {
+      if(id == allridges[e].vertices[v].id) {
         flag = 1;
         break;
       }
     }
-    if(flag){
-      neighs = realloc(neighs, (*length+1)*sizeof(unsigned));
-      if(neighs == NULL){
+    if(flag) {
+      neighs = realloc(neighs, (*length + 1) * sizeof(unsigned));
+      if(neighs == NULL) {
         error("realloc failure - exiting\n");
       }
       neighs[*length] = e;
@@ -281,39 +289,40 @@ unsigned* neighRidges(unsigned id, RidgeT* allridges, unsigned nridges,
 }
 
 // whether distinct x1 and x2 belong to array of distinct values ---------------
-unsigned areElementsOf(unsigned x1, unsigned x2, unsigned* array,
-                       unsigned length)
-{
+unsigned areElementsOf(unsigned x1,
+                       unsigned x2,
+                       unsigned* array,
+                       unsigned length) {
   unsigned count = 0;
-  for(unsigned i=0; (i < length) && (count < 2); i++){
-    if(x1 == array[i] || x2 == array[i]){
+  for(unsigned i = 0; (i < length) && (count < 2); i++) {
+    if(x1 == array[i] || x2 == array[i]) {
       count++;
     }
   }
-  return count==2;
+  return count == 2;
 }
 
 // make face/ridge edges from all edges ----------------------------------------
-unsigned** makeEdges(SetOfVerticesT face, unsigned** alledges,
-                     unsigned nalledges, unsigned* lengthout)
-{
+unsigned** makeEdges(SetOfVerticesT face,
+                     unsigned** alledges,
+                     unsigned nalledges,
+                     unsigned* lengthout) {
   *lengthout = 0;
   unsigned* faceverticesids = map_vertexid(face.vertices, face.nvertices);
   unsigned flags[nalledges];
-  for(unsigned e=0; e < nalledges; e++){
+  for(unsigned e = 0; e < nalledges; e++) {
     if(areElementsOf(alledges[e][0], alledges[e][1], faceverticesids,
-                     face.nvertices))
-    {
+                     face.nvertices)) {
       flags[e] = 1;
       (*lengthout)++;
-    }else{
+    } else {
       flags[e] = 0;
     }
   }
   unsigned** out = malloc(*lengthout * sizeof(unsigned*));
   unsigned count = 0;
-  for(unsigned e=0; e < nalledges; e++){
-    if(flags[e] == 1){
+  for(unsigned e = 0; e < nalledges; e++) {
+    if(flags[e] == 1) {
       out[count] = alledges[e];
       count++;
     }
@@ -322,39 +331,40 @@ unsigned** makeEdges(SetOfVerticesT face, unsigned** alledges,
 }
 
 // all edges from all vertices -------------------------------------------------
-unsigned** allEdges(FullVertexT* vertices, unsigned nvertices,
-                    unsigned outlength)
-{
+unsigned** allEdges(FullVertexT* vertices,
+                    unsigned nvertices,
+                    unsigned outlength) {
   unsigned** out = malloc(outlength * sizeof(unsigned*));
-  for(unsigned i=0; i < vertices[0].nneighsvertices; i++){
+  for(unsigned i = 0; i < vertices[0].nneighsvertices; i++) {
     out[i] = malloc(2 * sizeof(unsigned));
     out[i][0] = vertices[0].id;
     out[i][1] = vertices[0].neighvertices[i];
     qsortu(out[i], 2);
   }
   unsigned n = vertices[0].nneighsvertices;
-  for(unsigned v=1; v < nvertices; v++){
+  for(unsigned v = 1; v < nvertices; v++) {
     unsigned ids[2];
-    for(unsigned i=0; i < vertices[v].nneighsvertices; i++){
+    for(unsigned i = 0; i < vertices[v].nneighsvertices; i++) {
       ids[0] = vertices[v].id;
       ids[1] = vertices[v].neighvertices[i];
       qsortu(ids, 2);
       unsigned j;
-      for(j=0; j < n; j++){
-        if(ids[0] == out[j][0] && ids[1] == out[j][1]){
+      for(j = 0; j < n; j++) {
+        if(ids[0] == out[j][0] && ids[1] == out[j][1]) {
           break;
         }
       }
-      if(j == n){
+      if(j == n) {
         out[n] = malloc(2 * sizeof(unsigned));
-        out[n][0] = ids[0]; out[n][1] = ids[1];
+        out[n][0] = ids[0];
+        out[n][1] = ids[1];
         n++;
       }
-      if(n == outlength){
+      if(n == outlength) {
         break;
       }
     }
-    if(n == outlength){
+    if(n == outlength) {
       break;
     }
   }
@@ -367,68 +377,67 @@ unsigned** allEdges(FullVertexT* vertices, unsigned nvertices,
 // they form the square at the intersection
 
 // main function ---------------------------------------------------------------
-ConvexHullT* convexHull(
-	double*   points,
-	unsigned  dim,
-	unsigned  n,
-  unsigned  triangulate,
-	unsigned* exitcode,
-  const char* errfilename
-)
-{
-	char opts[250]; // option flags for qhull, see qh_opt.htm
+ConvexHullT* convexHull(double* points,
+                        unsigned dim,
+                        unsigned n,
+                        unsigned triangulate,
+                        unsigned* exitcode,
+                        const char* errfilename) {
+  char opts[250];  // option flags for qhull, see qh_opt.htm
   sprintf(opts, "qhull s FF %s", triangulate ? "Qt" : "");
-	qhT qh_qh;       // Qhull's data structure
-  qhT *qh= &qh_qh;
+  qhT qh_qh;  // Qhull's data structure
+  qhT* qh = &qh_qh;
   QHULL_LIB_CHECK
-	boolT ismalloc  = False; // True if qhull should free points in qh_freeqhull() or reallocation
-	FILE* errfile   = fopen(errfilename, "w+"); // NULL;
-  FILE* outfile   = NULL;
+  boolT ismalloc = False;  // True if qhull should free points in qh_freeqhull()
+                           // or reallocation
+  FILE* errfile = fopen(errfilename, "w+");  // NULL;
+  FILE* outfile = NULL;
   qh_meminit(qh, errfile);
   qh_zero(qh, errfile);
-	exitcode[0] = qh_new_qhull(qh, dim, n, points, ismalloc, opts, outfile,
-                             errfile);
+  exitcode[0] =
+      qh_new_qhull(qh, dim, n, points, ismalloc, opts, outfile, errfile);
   fclose(errfile);
 
   ConvexHullT* out = malloc(sizeof(ConvexHullT));
 
-	if (!exitcode[0]) {  // 0 if no error from qhull
+  if(!exitcode[0]) {  // 0 if no error from qhull
     unsigned nfaces = qh->num_facets;
-    FaceT*   faces  = malloc(nfaces * sizeof(FaceT));
+    FaceT* faces = malloc(nfaces * sizeof(FaceT));
     {
-      facetT *facet; unsigned i_facet = 0;
-      FORALLfacets{
-        facet->id                  = i_facet; // for neighbors and ridgeOf
-        faces[i_facet].area        = qh_facetarea(qh, facet);
-        double* center             = qh_getcenter(qh, facet->vertices);
-        faces[i_facet].center      = malloc(dim * sizeof(double));
-        for(unsigned i=0; i < dim; i++){
+      facetT* facet;
+      unsigned i_facet = 0;
+      FORALLfacets {
+        facet->id = i_facet;  // for neighbors and ridgeOf
+        faces[i_facet].area = qh_facetarea(qh, facet);
+        double* center = qh_getcenter(qh, facet->vertices);
+        faces[i_facet].center = malloc(dim * sizeof(double));
+        for(unsigned i = 0; i < dim; i++) {
           faces[i_facet].center[i] = center[i];
         }
         double* normal = facet->normal;
-        faces[i_facet].normal      = malloc(dim * sizeof(double));
-        for(unsigned i=0; i < dim; i++){
+        faces[i_facet].normal = malloc(dim * sizeof(double));
+        for(unsigned i = 0; i < dim; i++) {
           faces[i_facet].normal[i] = normal[i];
         }
-        faces[i_facet].offset      = facet->offset;
+        faces[i_facet].offset = facet->offset;
         faces[i_facet].orientation = facet->toporient ? -1 : 1;
-        faces[i_facet].nvertices   = (unsigned) qh_setsize(qh, facet->vertices);
-        { // face vertices
+        faces[i_facet].nvertices = (unsigned)qh_setsize(qh, facet->vertices);
+        {  // face vertices
           faces[i_facet].vertices =
-            (VertexT*) malloc(faces[i_facet].nvertices * sizeof(VertexT));
+              (VertexT*)malloc(faces[i_facet].nvertices * sizeof(VertexT));
           vertexT *vertex, **vertexp;
           unsigned i_vertex = 0;
-          FOREACHvertex_(facet->vertices){
+          FOREACHvertex_(facet->vertices) {
             faces[i_facet].vertices[i_vertex].id =
-              (unsigned) qh_pointid(qh, vertex->point);
+                (unsigned)qh_pointid(qh, vertex->point);
             faces[i_facet].vertices[i_vertex].point =
-              malloc(dim * sizeof(double));
+                malloc(dim * sizeof(double));
             faces[i_facet].vertices[i_vertex].point =
-              getpoint(points, dim, faces[i_facet].vertices[i_vertex].id);
+                getpoint(points, dim, faces[i_facet].vertices[i_vertex].id);
             i_vertex++;
           }
-          //qsort(faces[i_facet].vertices, faces[i_facet].nvertices,
-            //    sizeof(VertexT), cmpvertices);
+          // qsort(faces[i_facet].vertices, faces[i_facet].nvertices,
+          //    sizeof(VertexT), cmpvertices);
         }
         /*if(dim == 3){ // orientation of the normals
           pointT* onepoint = ((vertexT*)facet->vertices->e[0].p)->point;
@@ -456,47 +465,47 @@ ConvexHullT* convexHull(
       }
     }
 
-    { // neighbor faces, faces families, and ridges
-      facetT *facet;
+    {  // neighbor faces, faces families, and ridges
+      facetT* facet;
       unsigned i_facet = 0;
-      FORALLfacets{
+      FORALLfacets {
         {
           faces[i_facet].neighborsize = qh_setsize(qh, facet->neighbors);
           faces[i_facet].neighbors =
-            malloc(faces[i_facet].neighborsize * sizeof(unsigned));
+              malloc(faces[i_facet].neighborsize * sizeof(unsigned));
           unsigned i_neighbor = 0;
           facetT *neighbor, **neighborp;
-          FOREACHneighbor_(facet){
-            faces[i_facet].neighbors[i_neighbor] = (unsigned) neighbor->id;
+          FOREACHneighbor_(facet) {
+            faces[i_facet].neighbors[i_neighbor] = (unsigned)neighbor->id;
             i_neighbor++;
           }
           qsortu(faces[i_facet].neighbors, faces[i_facet].neighborsize);
         }
-        { // face family, when option Qt
-          if(facet->tricoplanar){
+        {  // face family, when option Qt
+          if(facet->tricoplanar) {
             faces[i_facet].family = facet->f.triowner->id;
-          }else{
+          } else {
             faces[i_facet].family = -1;
           }
         }
-        { // face ridges
+        {  // face ridges
           qh_makeridges(qh, facet);
           unsigned nridges = qh_setsize(qh, facet->ridges);
           RidgeT* ridges = malloc(nridges * sizeof(RidgeT));
           ridgeT *ridge, **ridgep;
           unsigned i_ridge = 0;
-          FOREACHridge_(facet->ridges){
+          FOREACHridge_(facet->ridges) {
             ridges[i_ridge].nedges = 0;
-            unsigned ridgeSize = qh_setsize(qh, ridge->vertices); // = dim-1
+            unsigned ridgeSize = qh_setsize(qh, ridge->vertices);  // = dim-1
             ridges[i_ridge].nvertices = ridgeSize;
             unsigned ids[ridgeSize];
-            for(unsigned v=0; v < ridgeSize; v++){
+            for(unsigned v = 0; v < ridgeSize; v++) {
               ids[v] =
-                qh_pointid(qh, ((vertexT*)ridge->vertices->e[v].p)->point);
+                  qh_pointid(qh, ((vertexT*)ridge->vertices->e[v].p)->point);
             }
             qsortu(ids, ridgeSize);
             ridges[i_ridge].vertices = malloc(ridgeSize * sizeof(VertexT));
-            for(unsigned v=0; v < ridgeSize; v++){
+            for(unsigned v = 0; v < ridgeSize; v++) {
               ridges[i_ridge].vertices[v].id = ids[v];
               ridges[i_ridge].vertices[v].point = getpoint(points, dim, ids[v]);
             }
@@ -510,12 +519,12 @@ ConvexHullT* convexHull(
             i_ridge++;
           }
           // merge triangulated ridges
-          if(dim > 3 && !triangulate){
+          if(dim > 3 && !triangulate) {
             unsigned l;
-            faces[i_facet].ridges  = mergeRidges(ridges, nridges, &l);
+            faces[i_facet].ridges = mergeRidges(ridges, nridges, &l);
             faces[i_facet].nridges = l;
-          }else{ // dim 2 or 3, or triangulate option
-            faces[i_facet].ridges  = ridges;
+          } else {  // dim 2 or 3, or triangulate option
+            faces[i_facet].ridges = ridges;
             faces[i_facet].nridges = nridges;
           }
         }
@@ -535,47 +544,47 @@ ConvexHullT* convexHull(
     unsigned nvertices = qh->num_vertices;
     FullVertexT* vertices = malloc(nvertices * sizeof(FullVertexT));
     {
-      qh_vertexneighbors(qh); // make the neighbor facets of the vertices
-      vertexT *vertex;
-      unsigned i_vertex=0;
-      FORALLvertices{
+      qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
+      vertexT* vertex;
+      unsigned i_vertex = 0;
+      FORALLvertices {
         // vertex id and coordinates
-        vertices[i_vertex].id    = (unsigned) qh_pointid(qh, vertex->point);
+        vertices[i_vertex].id = (unsigned)qh_pointid(qh, vertex->point);
         vertices[i_vertex].point = getpoint(points, dim, vertices[i_vertex].id);
 
         // neighbor facets of the vertex
         vertices[i_vertex].nneighfacets = qh_setsize(qh, vertex->neighbors);
         vertices[i_vertex].neighfacets =
-          malloc(vertices[i_vertex].nneighfacets * sizeof(unsigned));
+            malloc(vertices[i_vertex].nneighfacets * sizeof(unsigned));
         facetT *neighbor, **neighborp;
         unsigned i_neighbor = 0;
-        FOREACHneighbor_(vertex){
+        FOREACHneighbor_(vertex) {
           vertices[i_vertex].neighfacets[i_neighbor] = neighbor->id;
           i_neighbor++;
         }
         qsortu(vertices[i_vertex].neighfacets, vertices[i_vertex].nneighfacets);
 
         // neighbor vertices of the vertex
-        if(dim > 2){
+        if(dim > 2) {
           unsigned nneighsvertices;
           vertices[i_vertex].neighvertices =
-            neighVertices(vertices[i_vertex].id, allridges, n_allridges,
-                          dim, triangulate, &nneighsvertices);
+              neighVertices(vertices[i_vertex].id, allridges, n_allridges, dim,
+                            triangulate, &nneighsvertices);
           vertices[i_vertex].nneighsvertices = nneighsvertices;
-        }else{ // dim=2
+        } else {  // dim=2
           vertices[i_vertex].nneighsvertices = 2;
-          vertices[i_vertex].neighvertices   = malloc(2 * sizeof(unsigned));
+          vertices[i_vertex].neighvertices = malloc(2 * sizeof(unsigned));
           unsigned count = 0;
-          for(unsigned f=0; f < nfaces; f++){
-            for(unsigned i=0; i < 2; i++){
-              if(faces[f].vertices[i].id == vertices[i_vertex].id){
+          for(unsigned f = 0; f < nfaces; f++) {
+            for(unsigned i = 0; i < 2; i++) {
+              if(faces[f].vertices[i].id == vertices[i_vertex].id) {
                 vertices[i_vertex].neighvertices[count] =
-                  faces[f].vertices[1-i].id;
+                    faces[f].vertices[1 - i].id;
                 count++;
                 break;
               }
             }
-            if(count == 2){
+            if(count == 2) {
               break;
             }
           }
@@ -584,14 +593,13 @@ ConvexHullT* convexHull(
                vertices[i_vertex].nneighsvertices);
 
         // neighbor ridges of the vertex
-        if(dim > 2){
+        if(dim > 2) {
           unsigned nneighridges;
-          vertices[i_vertex].neighridges =
-            neighRidges(vertices[i_vertex].id, allridges, n_allridges,
-                       &nneighridges);
+          vertices[i_vertex].neighridges = neighRidges(
+              vertices[i_vertex].id, allridges, n_allridges, &nneighridges);
           qsortu(vertices[i_vertex].neighridges, nneighridges);
           vertices[i_vertex].nneighridges = nneighridges;
-        }else{ // dim=2 -> ridge = vertex singleton
+        } else {  // dim=2 -> ridge = vertex singleton
           vertices[i_vertex].nneighridges = 0;
         }
         ////
@@ -603,26 +611,27 @@ ConvexHullT* convexHull(
 
     // all edges
     unsigned nalledges = 0;
-    for(unsigned v=0; v < nvertices; v++){
+    for(unsigned v = 0; v < nvertices; v++) {
       nalledges += vertices[v].nneighsvertices;
     }
     nalledges /= 2;
     unsigned** alledges = allEdges(vertices, nvertices, nalledges);
     qsort(alledges, nalledges, sizeof(unsigned*), cmpedges);
 
-    { // faces edges and ridges ids
-      facetT *facet; unsigned i_facet=0;
-      FORALLfacets{
+    {  // faces edges and ridges ids
+      facetT* facet;
+      unsigned i_facet = 0;
+      FORALLfacets {
         // facet ridges ids
         faces[i_facet].ridgesids =
-          map_ridgeid(faces[i_facet].ridges, faces[i_facet].nridges);
+            map_ridgeid(faces[i_facet].ridges, faces[i_facet].nridges);
         qsortu(faces[i_facet].ridgesids, faces[i_facet].nridges);
         // facet edges
         SetOfVerticesT facet_vset = {.vertices = faces[i_facet].vertices,
                                      .nvertices = faces[i_facet].nvertices};
         unsigned nfaceedges;
         faces[i_facet].edges =
-          makeEdges(facet_vset, alledges, nalledges, &nfaceedges);
+            makeEdges(facet_vset, alledges, nalledges, &nfaceedges);
         faces[i_facet].nedges = nfaceedges;
         ////
         i_facet++;
@@ -630,43 +639,43 @@ ConvexHullT* convexHull(
     }
 
     // ridges edges
-    if(dim > 3){
-      for(unsigned r=0; r < n_allridges; r++){
+    if(dim > 3) {
+      for(unsigned r = 0; r < n_allridges; r++) {
         unsigned facetid = allridges[r].ridgeOf1;
         SetOfVerticesT vset = {.vertices = allridges[r].vertices,
                                .nvertices = allridges[r].nvertices};
         unsigned nedges;
-        allridges[r].edges =
-          makeEdges(vset, faces[facetid].edges, faces[facetid].nedges, &nedges);
+        allridges[r].edges = makeEdges(vset, faces[facetid].edges,
+                                       faces[facetid].nedges, &nedges);
         allridges[r].nedges = nedges;
       }
     }
 
     // output
-    out->dim       = dim;
-    out->vertices  = vertices;
+    out->dim = dim;
+    out->vertices = vertices;
     out->nvertices = nvertices;
-    out->faces     = faces;
-    out->nfaces    = nfaces;
-    out->ridges    = allridges;
-    out->nridges   = n_allridges;
-    out->edges     = alledges;
-    out->nedges    = nalledges;
+    out->faces = faces;
+    out->nfaces = nfaces;
+    out->ridges = allridges;
+    out->nridges = n_allridges;
+    out->edges = alledges;
+    out->nedges = nalledges;
 
-  } // end if exitcode
+  }  // end if exitcode
 
   // Do cleanup regardless of whether there is an error
   int curlong, totlong;
-	qh_freeqhull(qh, !qh_ALL);               // free long memory
-	qh_memfreeshort(qh, &curlong, &totlong); // free short memory and memory allocator
+  qh_freeqhull(qh, !qh_ALL);  // free long memory
+  qh_memfreeshort(qh, &curlong,
+                  &totlong);  // free short memory and memory allocator
 
-  if(*exitcode){
+  if(*exitcode) {
     free(out);
     return 0;
-  }else{
+  } else {
     return out;
   }
-
 }
 
 // -------------------------------------------------------------------------- //
@@ -674,7 +683,7 @@ ConvexHullT* convexHull(
 // -------------------------------------------------------------------------- //
 
 // FullVertexT to SEXP ---------------------------------------------------------
-SEXP VertexSXP(FullVertexT vertex, unsigned dim){
+SEXP VertexSXP(FullVertexT vertex, unsigned dim) {
   unsigned nprotect = 0;
   SEXP R_vertex, names, id, point, neighvertices, neighridges, neighfacets;
 
@@ -684,28 +693,28 @@ SEXP VertexSXP(FullVertexT vertex, unsigned dim){
 
   PROTECT(point = allocVector(REALSXP, dim));
   nprotect++;
-  for(int i=0; i < dim; i++){
+  for(int i = 0; i < dim; i++) {
     REAL(point)[i] = vertex.point[i];
   }
 
   unsigned nneighvertices = vertex.nneighsvertices;
   PROTECT(neighvertices = allocVector(INTSXP, nneighvertices));
   nprotect++;
-  for(unsigned i=0; i < nneighvertices; i++){
+  for(unsigned i = 0; i < nneighvertices; i++) {
     INTEGER(neighvertices)[i] = 1 + vertex.neighvertices[i];
   }
 
   unsigned nneighridges = vertex.nneighridges;
   PROTECT(neighridges = allocVector(INTSXP, nneighridges));
   nprotect++;
-  for(unsigned i=0; i < nneighridges; i++){
+  for(unsigned i = 0; i < nneighridges; i++) {
     INTEGER(neighridges)[i] = 1 + vertex.neighridges[i];
   }
 
   unsigned nneighfacets = vertex.nneighfacets;
   PROTECT(neighfacets = allocVector(INTSXP, nneighfacets));
   nprotect++;
-  for(unsigned i=0; i < nneighfacets; i++){
+  for(unsigned i = 0; i < nneighfacets; i++) {
     INTEGER(neighfacets)[i] = 1 + vertex.neighfacets[i];
   }
 
@@ -731,7 +740,7 @@ SEXP VertexSXP(FullVertexT vertex, unsigned dim){
 }
 
 // RidgeT to SEXP --------------------------------------------------------------
-SEXP RidgeSXP(RidgeT ridge, unsigned dim){
+SEXP RidgeSXP(RidgeT ridge, unsigned dim) {
   unsigned nprotect = 0;
   SEXP R_ridge, names, id, vertices, edges, ridgeOf;
 
@@ -742,17 +751,17 @@ SEXP RidgeSXP(RidgeT ridge, unsigned dim){
   unsigned nvertices = ridge.nvertices;
   PROTECT(vertices = allocVector(INTSXP, nvertices));
   nprotect++;
-  for(unsigned i=0; i < nvertices; i++){
+  for(unsigned i = 0; i < nvertices; i++) {
     INTEGER(vertices)[i] = 1 + ((ridge.vertices)[i]).id;
   }
 
-  if(dim > 3){
+  if(dim > 3) {
     unsigned nedges = ridge.nedges;
     PROTECT(edges = allocMatrix(INTSXP, nedges, 2));
     nprotect++;
-    for(unsigned i=0; i < nedges; i++){
+    for(unsigned i = 0; i < nedges; i++) {
       INTEGER(edges)[i] = 1 + ridge.edges[i][0];
-      INTEGER(edges)[i+nedges] = 1 + ridge.edges[i][1];
+      INTEGER(edges)[i + nedges] = 1 + ridge.edges[i][1];
     }
   }
 
@@ -768,7 +777,7 @@ SEXP RidgeSXP(RidgeT ridge, unsigned dim){
   SET_VECTOR_ELT(R_ridge, 0, id);
   SET_VECTOR_ELT(R_ridge, 1, ridgeOf);
   SET_VECTOR_ELT(R_ridge, 2, vertices);
-  if(dim > 3){
+  if(dim > 3) {
     SET_VECTOR_ELT(R_ridge, 3, edges);
   }
 
@@ -777,7 +786,7 @@ SEXP RidgeSXP(RidgeT ridge, unsigned dim){
   SET_VECTOR_ELT(names, 0, mkChar("id"));
   SET_VECTOR_ELT(names, 1, mkChar("ridgeOf"));
   SET_VECTOR_ELT(names, 2, mkChar("vertices"));
-  if(dim > 3){
+  if(dim > 3) {
     SET_VECTOR_ELT(names, 3, mkChar("edges"));
   }
   setAttrib(R_ridge, R_NamesSymbol, names);
@@ -787,37 +796,37 @@ SEXP RidgeSXP(RidgeT ridge, unsigned dim){
 }
 
 // FaceT to SEXP ---------------------------------------------------------------
-SEXP FaceSXP(FaceT face, unsigned dim){
+SEXP FaceSXP(FaceT face, unsigned dim) {
   unsigned nprotect = 0;
   SEXP R_face, names, vertices, edges, ridges, neighbors, volume, center,
-       normal, offset, orientation, family;
+      normal, offset, orientation, family;
 
   unsigned nvertices = face.nvertices;
   PROTECT(vertices = allocVector(INTSXP, nvertices));
   nprotect++;
-  for(unsigned i=0; i < nvertices; i++){
+  for(unsigned i = 0; i < nvertices; i++) {
     INTEGER(vertices)[i] = 1 + face.vertices[i].id;
   }
 
   unsigned nedges = face.nedges;
   PROTECT(edges = allocMatrix(INTSXP, nedges, 2));
   nprotect++;
-  for(unsigned i=0; i < nedges; i++){
+  for(unsigned i = 0; i < nedges; i++) {
     INTEGER(edges)[i] = 1 + face.edges[i][0];
-    INTEGER(edges)[i+nedges] = 1 + face.edges[i][1];
+    INTEGER(edges)[i + nedges] = 1 + face.edges[i][1];
   }
 
   unsigned nridges = face.nridges;
   PROTECT(ridges = allocVector(INTSXP, nridges));
   nprotect++;
-  for(unsigned i=0; i < nridges; i++){
+  for(unsigned i = 0; i < nridges; i++) {
     INTEGER(ridges)[i] = 1 + face.ridgesids[i];
   }
 
   unsigned nneighbors = face.neighborsize;
   PROTECT(neighbors = allocVector(INTSXP, nneighbors));
   nprotect++;
-  for(unsigned i=0; i < nneighbors; i++){
+  for(unsigned i = 0; i < nneighbors; i++) {
     INTEGER(neighbors)[i] = 1 + face.neighbors[i];
   }
 
@@ -827,13 +836,13 @@ SEXP FaceSXP(FaceT face, unsigned dim){
 
   PROTECT(center = allocVector(REALSXP, dim));
   nprotect++;
-  for(unsigned i=0; i < dim; i++){
+  for(unsigned i = 0; i < dim; i++) {
     REAL(center)[i] = face.center[i];
   }
 
   PROTECT(normal = allocVector(REALSXP, dim));
   nprotect++;
-  for(unsigned i=0; i < dim; i++){
+  for(unsigned i = 0; i < dim; i++) {
     REAL(normal)[i] = face.normal[i];
   }
 
@@ -881,24 +890,24 @@ SEXP FaceSXP(FaceT face, unsigned dim){
 }
 
 // main function ---------------------------------------------------------------
-SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
-
+SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile) {
   unsigned nprotect = 0;
 
   unsigned dim = ncols(p);
-  unsigned n   = nrows(p);
+  unsigned n = nrows(p);
 
-  double* points = (double*) R_alloc(n*dim, sizeof(double));
-  for(unsigned i=0; i < n; i++)
-    for(unsigned j=0; j < dim; j++)
-      points[dim*i+j] = REAL(p)[i+n*j]; // could have been REAL(p) if p had been transposed
+  double* points = (double*)R_alloc(n * dim, sizeof(double));
+  for(unsigned i = 0; i < n; i++)
+    for(unsigned j = 0; j < dim; j++)
+      points[dim * i + j] = REAL(
+          p)[i + n * j];  // could have been REAL(p) if p had been transposed
 
   unsigned tri = INTEGER(triangulate)[0];
 
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
   ConvexHullT* ch = convexHull(points, dim, n, tri, &exitcode, e);
-  if (exitcode) {
+  if(exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }
 
@@ -916,25 +925,25 @@ SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
   PROTECT(R_vertices = allocVector(VECSXP, nvertices));
   PROTECT(vnames = allocVector(STRSXP, nvertices));
   nprotect += 2;
-  for(unsigned i=0; i < nvertices; i++){
+  for(unsigned i = 0; i < nvertices; i++) {
     SEXP vertex;
     PROTECT(vertex = VertexSXP(vertices[i], dim));
     nprotect++;
     SET_VECTOR_ELT(R_vertices, i, vertex);
-    SET_STRING_ELT(vnames, i, Rf_asChar(VECTOR_ELT(vertex,0)));
+    SET_STRING_ELT(vnames, i, Rf_asChar(VECTOR_ELT(vertex, 0)));
   }
   setAttrib(R_vertices, R_NamesSymbol, vnames);
 
   PROTECT(R_edges = allocMatrix(INTSXP, nedges, 2));
   nprotect++;
-  for(unsigned i=0; i < nedges; i++){
+  for(unsigned i = 0; i < nedges; i++) {
     INTEGER(R_edges)[i] = 1 + edges[i][0];
-    INTEGER(R_edges)[i+nedges] = 1 + edges[i][1];
+    INTEGER(R_edges)[i + nedges] = 1 + edges[i][1];
   }
 
   PROTECT(R_ridges = allocVector(VECSXP, nridges));
   nprotect++;
-  for(unsigned i=0; i < nridges; i++){
+  for(unsigned i = 0; i < nridges; i++) {
     SEXP ridge;
     PROTECT(ridge = RidgeSXP(ridges[i], dim));
     nprotect++;
@@ -943,7 +952,7 @@ SEXP cxhull_(SEXP p, SEXP triangulate, SEXP errfile){
 
   PROTECT(R_faces = allocVector(VECSXP, nfaces));
   nprotect++;
-  for(unsigned i=0; i < nfaces; i++){
+  for(unsigned i = 0; i < nfaces; i++) {
     SEXP face;
     PROTECT(face = FaceSXP(faces[i], dim));
     nprotect++;

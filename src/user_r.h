@@ -33,10 +33,15 @@ Code flags --
 #define qhDEFuser 1
 
 /* Derived from Qt's corelib/global/qglobal.h */
-#if !defined(SAG_COM) && !defined(__CYGWIN__) && (defined(WIN64) || defined(_WIN64) || defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__))
-#   define QHULL_OS_WIN
-#elif defined(__MWERKS__) && defined(__INTEL__) /* Metrowerks discontinued before the release of Intel Macs */
-#   define QHULL_OS_WIN
+#if !defined(SAG_COM) && !defined(__CYGWIN__) &&                \
+    (defined(WIN64) || defined(_WIN64) || defined(__WIN64__) || \
+     defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || \
+     defined(__NT__))
+#define QHULL_OS_WIN
+#elif defined(__MWERKS__) &&                                                  \
+    defined(__INTEL__) /* Metrowerks discontinued before the release of Intel \
+                          Macs */
+#define QHULL_OS_WIN
 #endif
 
 /*============================================================*/
@@ -72,14 +77,15 @@ Code flags --
 #define MSG_TRACE3 3000
 #define MSG_TRACE4 4000
 #define MSG_TRACE5 5000
-#define MSG_ERROR  6000   /* errors written to qh.ferr */
+#define MSG_ERROR 6000 /* errors written to qh.ferr */
 #define MSG_WARNING 7000
-#define MSG_STDERR  8000  /* log messages Written to qh.ferr */
-#define MSG_OUTPUT  9000
-#define MSG_QHULL_ERROR 10000 /* errors thrown by QhullError.cpp (QHULLlastError is in QhullError.h) */
-#define MSG_FIXUP  11000  /* FIXUP QH11... */
-#define MSG_MAXLEN  3000 /* qh_printhelp_degenerate() in user.c */
-
+#define MSG_STDERR 8000 /* log messages Written to qh.ferr */
+#define MSG_OUTPUT 9000
+#define MSG_QHULL_ERROR                                                        \
+  10000 /* errors thrown by QhullError.cpp (QHULLlastError is in QhullError.h) \
+         */
+#define MSG_FIXUP 11000 /* FIXUP QH11... */
+#define MSG_MAXLEN 3000 /* qh_printhelp_degenerate() in user.c */
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="qh_OPTIONline">-</a>
@@ -133,30 +139,30 @@ Code flags --
    (sg@eeiwzb.et.tu-dresden.de) has done this.  He reports that the code runs
    much slower with little gain in precision.
 
-   WARNING: on some machines,    int f(){realT a= REALmax;return (a == REALmax);}
-      returns False.  Use (a > REALmax/2) instead of (a == REALmax).
+   WARNING: on some machines,    int f(){realT a= REALmax;return (a ==
+  REALmax);} returns False.  Use (a > REALmax/2) instead of (a == REALmax).
 
    REALfloat =   1      all numbers are 'float' type
              =   0      all numbers are 'double' type
 */
 #define REALfloat 0
 
-#if (REALfloat == 1)
+#if(REALfloat == 1)
 #define realT float
 #define REALmax FLT_MAX
 #define REALmin FLT_MIN
 #define REALepsilon FLT_EPSILON
-#define qh_REALdigits 8   /* maximum number of significant digits */
+#define qh_REALdigits 8 /* maximum number of significant digits */
 #define qh_REAL_1 "%6.8g "
 #define qh_REAL_2n "%6.8g %6.8g\n"
 #define qh_REAL_3n "%6.8g %6.8g %6.8g\n"
 
-#elif (REALfloat == 0)
+#elif(REALfloat == 0)
 #define realT double
 #define REALmax DBL_MAX
 #define REALmin DBL_MIN
 #define REALepsilon DBL_EPSILON
-#define qh_REALdigits 16    /* maximum number of significant digits */
+#define qh_REALdigits 16 /* maximum number of significant digits */
 #define qh_REAL_1 "%6.16g "
 #define qh_REAL_2n "%6.16g %6.16g\n"
 #define qh_REAL_3n "%6.16g %6.16g %6.16g\n"
@@ -169,12 +175,14 @@ Code flags --
   >--------------------------------</a><a name="countT">-</a>
 
   countT
-    The type for counts and identifiers (e.g., the number of points, vertex identifiers)
-    Currently used by C++ code-only.  Decided against using it for setT because most sets are small.
+    The type for counts and identifiers (e.g., the number of points, vertex
+  identifiers) Currently used by C++ code-only.  Decided against using it for
+  setT because most sets are small.
 
     Defined as 'int' for C-code compatibility and QH11026
 
-    FIXUP QH11026 countT may be defined as a unsigned value, but several code issues need to be solved first.  See countT in Changes.txt
+    FIXUP QH11026 countT may be defined as a unsigned value, but several code
+  issues need to be solved first.  See countT in Changes.txt
 */
 
 #ifndef DEFcountT
@@ -182,7 +190,6 @@ Code flags --
 typedef int countT;
 #endif
 #define COUNTmax 0x7fffffff
-
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="CPUclock">-</a>
@@ -211,29 +218,29 @@ typedef int countT;
 
      2          use qh_clock() with POSIX times() (see global_r.c)
 */
-#define qh_CLOCKtype 1  /* change to the desired number */
+#define qh_CLOCKtype 1 /* change to the desired number */
 
-#if (qh_CLOCKtype == 1)
+#if(qh_CLOCKtype == 1)
 
 #if defined(CLOCKS_PER_SECOND)
-#define qh_CPUclock    ((unsigned long)clock())  /* return CPU clock */
+#define qh_CPUclock ((unsigned long)clock()) /* return CPU clock */
 #define qh_SECticks CLOCKS_PER_SECOND
 
 #elif defined(CLOCKS_PER_SEC)
-#define qh_CPUclock    ((unsigned long)clock())  /* return CPU clock */
+#define qh_CPUclock ((unsigned long)clock()) /* return CPU clock */
 #define qh_SECticks CLOCKS_PER_SEC
 
 #elif defined(CLK_TCK)
-#define qh_CPUclock    ((unsigned long)clock())  /* return CPU clock */
+#define qh_CPUclock ((unsigned long)clock()) /* return CPU clock */
 #define qh_SECticks CLK_TCK
 
 #else
-#define qh_CPUclock    ((unsigned long)clock())  /* return CPU clock */
+#define qh_CPUclock ((unsigned long)clock()) /* return CPU clock */
 #define qh_SECticks 1E6
 #endif
 
-#elif (qh_CLOCKtype == 2)
-#define qh_CPUclock    qh_clock()  /* return CPU clock */
+#elif(qh_CLOCKtype == 2)
+#define qh_CPUclock qh_clock() /* return CPU clock */
 #define qh_SECticks 100
 
 #else /* qh_CLOCKtype == ? */
@@ -272,40 +279,40 @@ typedef int countT;
     If qh_RANDOMmax is wrong, qhull will report a warning and Geomview
     output will likely be invisible.
 */
-#define qh_RANDOMtype 5   /* *** change to the desired number *** */
+#define qh_RANDOMtype 5 /* *** change to the desired number *** */
 
-#if (qh_RANDOMtype == 1)
-#define qh_RANDOMmax ((realT)0x7fffffffUL)  /* 31 bits, random()/MAX */
+#if(qh_RANDOMtype == 1)
+#define qh_RANDOMmax ((realT)0x7fffffffUL) /* 31 bits, random()/MAX */
 #define qh_RANDOMint random()
 #define qh_RANDOMseed_(qh, seed) srandom(seed);
 
-#elif (qh_RANDOMtype == 2)
+#elif(qh_RANDOMtype == 2)
 #ifdef RAND_MAX
 #define qh_RANDOMmax ((realT)RAND_MAX)
 #else
-#define qh_RANDOMmax ((realT)32767)   /* 15 bits (System 5) */
+#define qh_RANDOMmax ((realT)32767) /* 15 bits (System 5) */
 #endif
-#define qh_RANDOMint  rand()
+#define qh_RANDOMint rand()
 #define qh_RANDOMseed_(qh, seed) srand((unsigned)seed);
 
-#elif (qh_RANDOMtype == 3)
-#define qh_RANDOMmax ((realT)0x7fffffffUL)  /* 31 bits, Sun */
-#define qh_RANDOMint  rand()
+#elif(qh_RANDOMtype == 3)
+#define qh_RANDOMmax ((realT)0x7fffffffUL) /* 31 bits, Sun */
+#define qh_RANDOMint rand()
 #define qh_RANDOMseed_(qh, seed) srand((unsigned)seed);
 
-#elif (qh_RANDOMtype == 4)
-#define qh_RANDOMmax ((realT)0x7fffffffUL)  /* 31 bits, lrand38()/MAX */
+#elif(qh_RANDOMtype == 4)
+#define qh_RANDOMmax ((realT)0x7fffffffUL) /* 31 bits, lrand38()/MAX */
 #define qh_RANDOMint lrand48()
 #define qh_RANDOMseed_(qh, seed) srand48(seed);
 
-#elif (qh_RANDOMtype == 5)  /* 'qh' is an implicit parameter */
-#define qh_RANDOMmax ((realT)2147483646UL)  /* 31 bits, qh_rand/MAX */
+#elif(qh_RANDOMtype == 5)                  /* 'qh' is an implicit parameter */
+#define qh_RANDOMmax ((realT)2147483646UL) /* 31 bits, qh_rand/MAX */
 #define qh_RANDOMint qh_rand(qh)
 #define qh_RANDOMseed_(qh, seed) qh_srand(qh, seed);
 /* unlike rand(), never returns 0 */
 
 #else
-#error: unknown random option
+#error : unknown random option
 #endif
 
 /*-<a                             href="qh-user_r.htm#TOC"
@@ -315,7 +322,6 @@ typedef int countT;
     0 for inward pointing normals by Geomview convention
 */
 #define qh_ORIENTclock 0
-
 
 /*============================================================*/
 /*============= joggle constants =============================*/
@@ -462,7 +468,7 @@ stop after qh_JOGGLEmaxretry attempts
     If using gcc, best alignment is [fmax_() is defined in geom_r.h]
               #define qh_MEMalign fmax_(__alignof__(realT),__alignof__(void *))
 */
-#define qh_MEMalign ((int)(fmax_(sizeof(realT), sizeof(void *))))
+#define qh_MEMalign ((int)(fmax_(sizeof(realT), sizeof(void*))))
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="MEMbufsize">-</a>
@@ -473,7 +479,7 @@ stop after qh_JOGGLEmaxretry attempts
   notes:
     used for qh_meminitbuffers() in global_r.c
 */
-#define qh_MEMbufsize 0x10000       /* allocate 64K memory buffers */
+#define qh_MEMbufsize 0x10000 /* allocate 64K memory buffers */
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="MEMinitbuf">-</a>
@@ -484,7 +490,7 @@ stop after qh_JOGGLEmaxretry attempts
   notes:
     use for qh_meminitbuffers() in global_r.c
 */
-#define qh_MEMinitbuf 0x20000      /* initially allocate 128K buffer */
+#define qh_MEMinitbuf 0x20000 /* initially allocate 128K buffer */
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="INFINITE">-</a>
@@ -492,7 +498,7 @@ stop after qh_JOGGLEmaxretry attempts
   qh_INFINITE
     on output, indicates Voronoi center at infinity
 */
-#define qh_INFINITE  -10.101
+#define qh_INFINITE -10.101
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="DEFAULTbox">-</a>
@@ -533,8 +539,8 @@ stop after qh_JOGGLEmaxretry attempts
   >--------------------------------</a><a name="COMPUTEfurthest">-</a>
 
   qh_COMPUTEfurthest
-    compute furthest distance to an outside point instead of storing it with the facet
-    =1 to compute furthest
+    compute furthest distance to an outside point instead of storing it with the
+  facet =1 to compute furthest
 
   notes:
     computing furthest saves memory but costs time
@@ -599,7 +605,7 @@ stop after qh_JOGGLEmaxretry attempts
     #define qh_NOtrace
 */
 
-#if 0  /* sample code */
+#if 0 /* sample code */
     exitcode= qh_new_qhull(qhT *qh, dim, numpoints, points, ismalloc,
                       flags, outfile, errfile);
     qh_freeqhull(qhT *qh, !qh_ALL); /* frees long memory used by second call */
@@ -612,7 +618,7 @@ stop after qh_JOGGLEmaxretry attempts
   qh_QUICKhelp
     =1 to use abbreviated help messages, e.g., for degenerate inputs
 */
-#define qh_QUICKhelp    0
+#define qh_QUICKhelp 0
 
 /*============================================================*/
 /*============= -merge constants- ============================*/
@@ -708,25 +714,23 @@ stop after qh_JOGGLEmaxretry attempts
   notes:
     'Qf' always searches for best facet
     if !qh.MERGING, same as qh.MINoutside.
-    if qh_USEfindbestnew, increase value since neighboring facets may be ill-behaved
-      [Note: Zdelvertextot occurs normally with interior points]
-            RBOX 1000 s Z1 G1e-13 t1001188774 | QHULL Tv
-    When there is a sharp edge, need to move points to a
-    clearly good facet; otherwise may be lost in another partitioning.
-    if too big then O(n^2) behavior for partitioning in cone
-    if very small then important points not processed
-    Needed in qh_partitionall for
-      RBOX 1000 s Z1 G1e-13 t1001032651 | QHULL Tv
-    Needed in qh_findbestnew for many instances of
-      RBOX 1000 s Z1 G1e-13 t | QHULL Tv
+    if qh_USEfindbestnew, increase value since neighboring facets may be
+  ill-behaved [Note: Zdelvertextot occurs normally with interior points] RBOX
+  1000 s Z1 G1e-13 t1001188774 | QHULL Tv When there is a sharp edge, need to
+  move points to a clearly good facet; otherwise may be lost in another
+  partitioning. if too big then O(n^2) behavior for partitioning in cone if very
+  small then important points not processed Needed in qh_partitionall for RBOX
+  1000 s Z1 G1e-13 t1001032651 | QHULL Tv Needed in qh_findbestnew for many
+  instances of RBOX 1000 s Z1 G1e-13 t | QHULL Tv
 
   See:
     qh_DISToutside -- when is a point clearly outside of a facet
     qh_SEARCHdist -- when is facet coplanar with the best facet?
     qh_USEfindbestnew -- when to use qh_findbestnew for qh_partitionpoint()
 */
-#define qh_DISToutside ((qh_USEfindbestnew ? 2 : 1) * \
-     fmax_((qh->MERGING ? 2 : 1)*qh->MINoutside, qh->max_outside))
+#define qh_DISToutside           \
+  ((qh_USEfindbestnew ? 2 : 1) * \
+   fmax_((qh->MERGING ? 2 : 1) * qh->MINoutside, qh->max_outside))
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="RATIOnearinside">-</a>
@@ -747,15 +751,17 @@ stop after qh_JOGGLEmaxretry attempts
 
   qh_SEARCHdist
     When is a facet coplanar with the best facet?
-    qh_findbesthorizon: all coplanar facets of the best facet need to be searched.
+    qh_findbesthorizon: all coplanar facets of the best facet need to be
+  searched.
 
   See:
     qh_DISToutside -- when is a point clearly outside of a facet
     qh_SEARCHdist -- when is facet coplanar with the best facet?
     qh_USEfindbestnew -- when to use qh_findbestnew for qh_partitionpoint()
 */
-#define qh_SEARCHdist ((qh_USEfindbestnew ? 2 : 1) * \
-      (qh->max_outside + 2 * qh->DISTround + fmax_( qh->MINvisible, qh->MAXcoplanar)));
+#define qh_SEARCHdist                                                   \
+  ((qh_USEfindbestnew ? 2 : 1) * (qh->max_outside + 2 * qh->DISTround + \
+                                  fmax_(qh->MINvisible, qh->MAXcoplanar)));
 
 /*-<a                             href="qh-user_r.htm#TOC"
   >--------------------------------</a><a name="USEfindbestnew">-</a>
@@ -796,7 +802,8 @@ stop after qh_JOGGLEmaxretry attempts
 
     Notes:
       Merging a duplicate ridge can lead to very wide facets.
-      A future release of qhull will avoid duplicate ridges by removing duplicate sub-ridges from the horizon
+      A future release of qhull will avoid duplicate ridges by removing
+  duplicate sub-ridges from the horizon
 */
 #define qh_WIDEduplicate 100
 
@@ -866,17 +873,14 @@ stop after qh_JOGGLEmaxretry attempts
      http://free-cad.sourceforge.net/SrcDocu/d2/d7f/MemDebug_8cpp_source.html
      https://github.com/illlust/Game/blob/master/library/MemoryLeak.cpp
 */
-#if 0   /* off (0) by default for QHULL_CRTDBG */
+#if 0 /* off (0) by default for QHULL_CRTDBG */
 #define QHULL_CRTDBG
 #endif
 
 #if defined(_MSC_VER) && defined(_DEBUG) && defined(QHULL_CRTDBG)
 #define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
 #include <crtdbg.h>
+#include <stdlib.h>
 #endif
 
 #endif /* qh_DEFuser */
-
-
-
