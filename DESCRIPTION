@@ -11,6 +11,7 @@ Maintainer: Stéphane Laurent <laurent_step@outlook.fr>
 Description: Computes the convex hull in arbitrary dimension, based on the Qhull library (<http://www.qhull.org>). The package provides a complete description of the convex hull: edges, ridges, facets, adjacencies. Triangulation is optional.
 License: GPL-3
 Encoding: UTF-8
+Imports: rgl 
 URL: https://github.com/stla/cxhull
 BugReports: https://github.com/stla/cxhull/issues
 RoxygenNote: 6.1.1
