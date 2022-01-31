@@ -230,6 +230,7 @@ plotConvexHull3d <- function(
 EdgesXYZ <- function(hull){
   edges <- EdgesAB(hull)
   nedges <- nrow(edges)
+  Vertices <- t(vapply(hull[["vertices"]], `[[`, numeric(3L), "point"))
   Edges <- matrix(NA_real_, nrow = 2L*nedges, ncol = 4L)
   rownames(Edges) <- paste0(
     rep(c("A", "B"), times = nedges),
