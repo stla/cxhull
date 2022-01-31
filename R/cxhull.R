@@ -165,3 +165,53 @@ EdgesAB <- function(hull){
   }
   edges
 }
+
+#' @title Plot triangulated 3D convex hull
+#' @description Plot a triangulated 3D convex hull with \strong{rgl}.
+#'
+#' @param hull an output of \code{\link{cxhull}} applied to 3D points and 
+#'   with the option \code{triangulate=TRUE}
+#' @param edgesAsTubes Boolean, whether to draw the edges as tubes
+#' @param verticesAsSpheres Boolean, whether to draw the vertices as spheres
+#' @param facesColor the color for the faces
+#' @param edgesColor the color for the edges 
+#' @param tubesRadius the radius of the tubes when \code{edgesAsTubes=TRUE}
+#' @param spheresRadius the radius of the spheres when 
+#'   \code{verticesAsSpheres=TRUE}
+#'
+#' @return No value.
+#' @export
+#'
+#' @importFrom rgl triangles3d cylinder3d shade3d lines3d spheres3d
+#'
+#' @examples library(cxhull)
+#' library(rgl)
+#' dodecahedron <- t(dodecahedron3d()$vb[-4L, ])
+#' hull <- cxhull(dodecahedron, triangulate = TRUE)
+#' open3d(windowRect = c(50, 50, 562, 562))
+#' plotConvexHull3d(hull)
+plotConvexHull3d <- function(
+  hull, edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
+  facesColor = "navy", edgesColor = "gold", 
+  tubesRadius = 0.03, spheresRadius = 0.05, spheresColor = edgesColor
+){
+  edges <- EdgesAB(hull)
+  trueEdges <- edges[edges[, 3L] == "yes", c(1L, 2L)]
+  triangles3d(TrianglesXYZ(hull), color = facesColor)
+  Vertices <- VerticesXYZ(hull)
+  for(i in 1L:nrow(trueEdges)){
+    edge <- trueEdges[i, ]
+    if(edgesAsTubes){
+      tube <- cylinder3d(
+        Vertices[edge, ], radius = tubesRadius, sides = 90
+      )
+      shade3d(tube, color = edgesColor)
+    }else{
+      lines3d(Vertices[edge, ], color = edgesColor, lwd = 2)
+    }
+  }
+  if(verticesAsSpheres){
+    spheres3d(Vertices, radius = spheresRadius, color = spheresColor)
+  }
+  invisible(NULL)
+}
