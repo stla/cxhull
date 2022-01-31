@@ -1,13 +1,21 @@
+Note: I changed my email address.
+
+
 ## Test environments
 
-* Windows 7, R 3.4.4 and R 3.5.2
-* win-builder (release)
+* Windows 10, R-4.1.2 
+* win-builder (devel)
+* mac-builder
+* Ubuntu 20, via Github action
+
 
 ## R CMD check results
 
 Status: OK
 
+
 ## Reverse dependencies
 
-There are no reverse dependencies.
+There's no consequence on the reverse dependencies: this new version only 
+provides new functions.
 
