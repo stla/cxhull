@@ -215,3 +215,32 @@ plotConvexHull3d <- function(
   }
   invisible(NULL)
 }
+
+#' @title Edges coordinates
+#' @description The coordinates of the extremities of the edges in a matrix, 
+#'   plus a column indicating which edges are border edges.
+#'
+#' @param hull an output of \code{\link{cxhull}} applied to 3D points and 
+#'   with the option \code{triangulate=TRUE}
+#'
+#' @return A numeric matrix with four columns. The first three values of a row 
+#'   are the coordinates of a vertex at the extremity of an edge, and the 
+#'   fourth column indicates whether the edge is a border edge.
+#' @export
+EdgesXYZ <- function(hull){
+  edges <- EdgesAB(hull)
+  nedges <- nrow(edges)
+  Edges <- matrix(NA_real_, nrow = 2L*nedges, ncol = 4L)
+  rownames(Edges) <- paste0(
+    rep(c("A", "B"), times = nedges),
+    rep(1L:nedges, each = 2L)
+  )
+  colnames(Edges) <- c("x", "y", "z", "border")
+  for(i in 1L:nedges){
+    edge <- edges[i, ]
+    border <- ifelse(edge[3L] == "yes", 1, 0)
+    edge <- edge[c(1L, 2L)]
+    Edges[(2L*i-1L):(2L*i), ] <- cbind(Vertices[edge, ], border)
+  }  
+  Edges
+}
