@@ -189,7 +189,17 @@ refineMesh <- function(mesh){
 #'   with the option \code{triangulate=TRUE}
 #' @param edgesAsTubes Boolean, whether to draw the edges as tubes
 #' @param verticesAsSpheres Boolean, whether to draw the vertices as spheres
-#' @param facesColor the color(s) for the faces; there are three possibilities: 
+#' @param palette a vector of colors to make a color gradient for the faces; 
+#'   if \code{NULL}, the colors of the faces are controlled by the 
+#'   \code{facesColor} argument
+#' @param bias,interpolate if \code{palette} is not \code{NULL}, these arguments are 
+#'   passed to \code{\link[grDevices]{colorRamp}}
+#' @param g a function defined on [0, 1] and taking its values in [0, 1]; it is 
+#'   composed with the function created by \code{\link[grDevices]{colorRamp}}, 
+#'   based on \code{palette}
+#' @param facesColor the color(s) for the faces; this argument is ignored if 
+#'   the argument \code{palette} is not \code{NULL}; otherwise there are three 
+#'   possibilities for \code{facesColor}: 
 #'   a single color, a vector of colors with length the number of triangles, 
 #'   in which case one color is assigned per triangle, or a vector of colors 
 #'   with length the number of faces, after merging the triangles, in 
@@ -213,11 +223,16 @@ refineMesh <- function(mesh){
 #' library(rgl)
 #' dodecahedron <- t(dodecahedron3d()$vb[-4L, ])
 #' hull <- cxhull(dodecahedron, triangulate = TRUE)
+#' # single color ####
 #' open3d(windowRect = c(50, 50, 562, 562))
 #' plotConvexHull3d(hull)
+#' # gradient ####
+#' open3d(windowRect = c(50, 50, 562, 562))
+#' plotConvexHull3d(hull, palette=hcl.colors(256, "Rocket"))
 plotConvexHull3d <- function(
   hull, edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
-  facesColor = "navy", palette = NULL, edgesColor = "gold", 
+  palette = NULL, bias = 1, interpolate = "linear", g = identity, 
+  facesColor = "navy", edgesColor = "gold", 
   tubesRadius = 0.03, spheresRadius = 0.05, spheresColor = edgesColor
 ){
   edges <- EdgesAB(hull)
@@ -264,8 +279,7 @@ plotConvexHull3d <- function(
       paste0("NA", seq_along(which(is.na(families))))
     ufamilies <- unique(families)
     mergedFaces <- rep(list(list()), length(ufamilies))
-    centers <- vector("list", length(ufamilies))
-    names(mergedFaces) <- names(centers) <- ufamilies
+    names(mergedFaces) <- ufamilies
     for(i in 1L:nTriangles){
       family <- families[i]
       mesh <- as.mesh3d(matrix(triangles[[i]], nrow = 3L, ncol = 3L))
@@ -274,17 +288,17 @@ plotConvexHull3d <- function(
     for(family in ufamilies){
       tomerge <- mergedFaces[[family]]
       if(length(tomerge) > 1L){
-        mergedFaces[[family]] <- refineMesh(mergeMeshes(tomerge)) -> mesh
+        mesh <- refineMesh(mergeMeshes(tomerge))
       }else{
-        mergedFaces[[family]] <- refineMesh(tomerge[[1L]]) -> mesh
+        mesh <- refineMesh(tomerge[[1L]])
       }
       vertices <- mesh[["vb"]][-4L, ]
-      centers[[family]] <- rowMeans(vertices) -> center
+      center <- rowMeans(vertices)
       vertices <- sweep(vertices, 1L, center, `-`)
       dists <- sqrt(apply(vertices, 2L, crossprod))
       dists <- (dists - min(dists)) / diff(range(dists))
-      fpalette <- colorRamp(palette)
-      RGB <- fpalette(dists)
+      fpalette <- colorRamp(palette, bias = bias, interpolate = interpolate)
+      RGB <- fpalette(g(dists))
       colors <- rgb(RGB[, 1L], RGB[, 2L], RGB[, 3L], maxColorValue = 255)
       mesh[["material"]][["color"]] <- colors
       shade3d(mesh)

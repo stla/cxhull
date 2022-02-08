@@ -8,8 +8,11 @@ plotConvexHull3d(
   hull,
   edgesAsTubes = TRUE,
   verticesAsSpheres = TRUE,
-  facesColor = "navy",
   palette = NULL,
+  bias = 1,
+  interpolate = "linear",
+  g = identity,
+  facesColor = "navy",
   edgesColor = "gold",
   tubesRadius = 0.03,
   spheresRadius = 0.05,
@@ -24,7 +27,20 @@ with the option \code{triangulate=TRUE}}
 
 \item{verticesAsSpheres}{Boolean, whether to draw the vertices as spheres}
 
-\item{facesColor}{the color(s) for the faces; there are three possibilities: 
+\item{palette}{a vector of colors to make a color gradient for the faces; 
+if \code{NULL}, the colors of the faces are controlled by the 
+\code{facesColor} argument}
+
+\item{bias, interpolate}{if \code{palette} is not \code{NULL}, these arguments are 
+passed to \code{\link[grDevices]{colorRamp}}}
+
+\item{g}{a function defined on [0, 1] and taking its values in [0, 1]; it is 
+composed with the function created by \code{\link[grDevices]{colorRamp}}, 
+based on \code{palette}}
+
+\item{facesColor}{the color(s) for the faces; this argument is ignored if 
+the argument \code{palette} is not \code{NULL}; otherwise there are three 
+possibilities for \code{facesColor}: 
 a single color, a vector of colors with length the number of triangles, 
 in which case one color is assigned per triangle, or a vector of colors 
 with length the number of faces, after merging the triangles, in 
@@ -52,6 +68,10 @@ library(cxhull)
 library(rgl)
 dodecahedron <- t(dodecahedron3d()$vb[-4L, ])
 hull <- cxhull(dodecahedron, triangulate = TRUE)
+# single color ####
 open3d(windowRect = c(50, 50, 562, 562))
 plotConvexHull3d(hull)
+# gradient ####
+open3d(windowRect = c(50, 50, 562, 562))
+plotConvexHull3d(hull, palette=hcl.colors(256, "Rocket"))
 }
