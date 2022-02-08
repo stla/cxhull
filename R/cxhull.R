@@ -405,11 +405,12 @@ hullSummary <- function(hull){
       "You didn't compute the convex hull with the option `triangulate=TRUE`."
     )
   }
-  families <- vapply(hull[["facets"]], `[[`, integer(1L), "family")
-  for(i in seq_along(hull[["facets"]])){
+  hullFacets <- hull[["facets"]]
+  families <- vapply(hullFacets, `[[`, integer(1L), "family")
+  for(i in seq_along(hullFacets)){
     attr(hull[["facets"]][[i]][["edges"]], "id") <- i
   }
-  otherFacets <- Filter(function(x) !is.na(x[["family"]]), hull[["facets"]])
+  otherFacets <- Filter(function(x) !is.na(x[["family"]]), hullFacets)
   Other <- tapply(lapply(lapply(
     otherFacets, `[[`, "edges"
   ),
@@ -424,7 +425,7 @@ hullSummary <- function(hull){
   }, simplify = FALSE)
   nOtherFacets <- length(Other)
   
-  triFacets <- Filter(function(x) is.na(x[["family"]]), hull[["facets"]])
+  triFacets <- Filter(function(x) is.na(x[["family"]]), hullFacets)
   nTriangles <- length(triFacets)
   
   Triangles <- tapply(lapply(
