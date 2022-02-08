@@ -408,7 +408,7 @@ hullSummary <- function(hull){
   hullFacets <- hull[["facets"]]
   families <- vapply(hullFacets, `[[`, integer(1L), "family")
   for(i in seq_along(hullFacets)){
-    attr(hull[["facets"]][[i]][["edges"]], "id") <- i
+    attr(hullFacets[[i]][["edges"]], "id") <- i
   }
   otherFacets <- Filter(function(x) !is.na(x[["family"]]), hullFacets)
   Other <- tapply(lapply(lapply(
