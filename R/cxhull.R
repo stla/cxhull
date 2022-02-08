@@ -228,7 +228,7 @@ refineMesh <- function(mesh){
 #' plotConvexHull3d(hull)
 #' # gradient ####
 #' open3d(windowRect = c(50, 50, 562, 562))
-#' plotConvexHull3d(hull, palette=hcl.colors(256, "Rocket"))
+#' plotConvexHull3d(hull, palette = hcl.colors(256, "Rocket"), bias = 0.5)
 plotConvexHull3d <- function(
   hull, edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
   palette = NULL, bias = 1, interpolate = "linear", g = identity, 
@@ -302,7 +302,6 @@ plotConvexHull3d <- function(
       colors <- rgb(RGB[, 1L], RGB[, 2L], RGB[, 3L], maxColorValue = 255)
       mesh[["material"]][["color"]] <- colors
       shade3d(mesh)
-      spheres3d(center, radius = 0.05, color="red")
     }
   }
   Vertices <- VerticesXYZ(hull)
