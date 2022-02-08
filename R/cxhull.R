@@ -247,3 +247,110 @@ EdgesXYZ <- function(hull){
   }  
   Edges
 }
+
+
+singleRows <- function(M){
+  rownames(M) <- paste0(M[, 1L], "-", M[, 2L])
+  tab12 <- table(rownames(M))
+  tab12 <- tab12[-which(tab12 == 2L)]
+  M[names(tab12), ]
+}
+
+polygonize <- function(edges){
+  nedges <- nrow(edges)
+  vs <- edges[1L, ]
+  v <- vs[2L]
+  edges <- edges[-1L, ]
+  for(. in 1L:(nedges-2L)){
+    j <- which(apply(edges, 1L, function(e) v %in% e))
+    v <- edges[j, ][which(edges[j, ] != v)]
+    vs <- c(vs, v)
+    edges <- edges[-j, ]
+  }
+  cbind(as.character(c(vs)), as.character(c(vs[-1L], vs[1L])))
+}
+
+
+#' @title Summary of 3D convex hull
+#' @description Summary of a triangulated 3D convex hull
+#'
+#' @param hull an output of \code{\link{cxhull}} applied to 3D points and 
+#'   with the option \code{triangulate=TRUE}
+#'
+#' @return A list with the vertices and the facets.
+#' @export
+#'
+#' @examples library(cxhull)
+#' # pyramid
+#' pts <- rbind(
+#'   c(0, 0, 0), 
+#'   c(1, 0, 0), 
+#'   c(1, 1, 0), 
+#'   c(0.5, 0.5, 1), 
+#'   c(0.5, 0.5, 0.9),
+#'   c(0, 1, 0)
+#' )
+#' hull <- cxhull(pts, triangulate = TRUE)
+#' hullSummary(hull)
+hullSummary <- function(hull){
+  if(!isTRUE(attr(hull, "3d"))){
+    stop("This function is restriced to the 3D case.")
+  }
+  if(!isTRUE(attr(hull, "triangulate"))){
+    stop(
+      "You didn't compute the convex hull with the option `triangulate=TRUE`"
+    )
+  }
+  
+  families <- vapply(hull[["facets"]], `[[`, integer(1L), "family")
+  
+  for(i in seq_along(hull[["facets"]])){
+    attr(hull[["facets"]][[i]][["edges"]], "id") <- i
+  }
+  
+  otherFacets <- Filter(function(x) !is.na(x[["family"]]), hull[["facets"]])
+  
+  Other <- tapply(lapply(lapply(
+    otherFacets, `[[`, "edges"
+  ),
+  identity
+  ), na.omit(families), function(x){
+    ids <- vapply(x, attr, integer(1L), "id")
+    list(
+      family   = families[ids[1L]],
+      facetids = ids,
+      edges    = polygonize(singleRows(do.call(rbind, x)))
+    )
+  }, simplify = FALSE)
+  nOtherFacets <- length(Other)
+  
+  triFacets <- Filter(function(x) is.na(x[["family"]]), hull[["facets"]])
+  nTriangles <- length(triFacets)
+  
+  Triangles <- tapply(lapply(
+    triFacets, `[[`, "edges"
+  ), seq_along(triFacets), function(x){
+    id <- attr(x[[1L]], "id")
+    list(
+      facetid = id,
+      edges   = polygonize(x[[1L]])
+    )
+  }, simplify = FALSE)
+  
+  Vertices <- lapply(unname(hull$vertices), `[`, c("id", "point"))
+  vertices <- t(vapply(Vertices, `[[`, numeric(3L), "point"))
+  rownames(vertices) <- as.character(vapply(Vertices, `[[`, integer(1L), "id"))
+  
+  out <- list(
+    vertices    = vertices,
+    triangles   = unname(Triangles),
+    otherfacets = unname(Other)
+  )
+  attr(out, "summary") <- sprintf(
+    "%d triangular facet%s, %d other facet%s",
+    nTriangles, ifelse(nTriangles > 1L, "s", ""),
+    nOtherFacets, ifelse(nOtherFacets > 1L, "s", "")
+  )
+  
+  out
+}
