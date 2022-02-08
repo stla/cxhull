@@ -1,10 +1,12 @@
-# cxhull 0.3.0.9000
+# cxhull 0.4.0
 
 * New function `hullSummary`, which returns a summary of a 3D triangulated 
 convex hull.
 
 * The `facesColor` argument of `plotConvexHull3d` now can be a vector, allowing 
 to assign different colors to the faces. See the README file for examples.
+
+* Updated the README file.
 
 
 # cxhull 0.3.0

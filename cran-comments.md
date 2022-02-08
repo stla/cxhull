@@ -1,5 +1,3 @@
-Note: I changed my email address.
-
 
 ## Test environments
 
