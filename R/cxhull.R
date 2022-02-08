@@ -389,7 +389,7 @@ hullSummary <- function(hull){
     triangles   = unname(Triangles),
     otherfacets = unname(Other)
   )
-  attr(out, "summary") <- sprintf(
+  attr(out, "facets") <- sprintf(
     "%d triangular facet%s, %d other facet%s",
     nTriangles, ifelse(nTriangles > 1L, "s", ""),
     nOtherFacets, ifelse(nOtherFacets > 1L, "s", "")

@@ -4,7 +4,7 @@
 convex hull.
 
 * The `facesColor` argument of `plotConvexHull3d` now can be a vector, allowing 
-to assign different colors to the faces
+to assign different colors to the faces. See the README file for examples.
 
 
 # cxhull 0.3.0

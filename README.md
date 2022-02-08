@@ -201,45 +201,6 @@ families, each one consisting of two triangles: two triangles belong to
 the same family mean that they are parts of the same facet of the
 non-triangulated hull.
 
-## Plotting a 3-dimensional hull
-
-The package provides the function `plotConvexHull3d` to plot a
-triangulated 3-dimensional hull with **rgl**:
-
-``` r
-library(rgl)
-# generates 50 points in the unit sphere (uniformly):
-set.seed(666)
-points <- uniformly::runif_in_sphere(50, d = 3)
-# computes the triangulated convex hull:
-h <- cxhull(points, triangulate = TRUE)
-# plot:
-open3d(windowRect = c(50, 50, 450, 450))
-view3d(10, 80, zoom = 0.75)
-plotConvexHull3d(hull, facesColor = "orangered", edgesColor = "yellow")
-```
-
-![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/dodecahedron.png)
-
-## Facets orientation
-
-The `plotConvexHull3d` function calls the `TrianglesXYZ` function, which
-takes care of the orientation of the facets. Indeed, with the code
-below, we see the whole convex hull while we hide the back side of the
-triangles:
-
-``` r
-triangles <- TrianglesXYZ(hull)
-open3d(windowRect = c(50, 50, 450, 450))
-view3d(10, 80, zoom = 0.75)
-triangles3d(triangles, color = "blue", back = "culled")
-```
-
-![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/dodecahedron_culled.png)
-
-The `orientation` field of a facet indicates its orientation (`1` or
-`-1`).
-
 ## Ordering the vertices
 
 Observe the vertices of the first face of the cube:
@@ -264,7 +225,7 @@ They are given as `8-4-6-2`. They are not ordered, in the sense that
 One can order the vertices as follows:
 
 ``` r
-polygon <- function(edges){
+polygonize <- function(edges){
   nedges <- nrow(edges)
   vs <- edges[1, ]
   v <- vs[2]
@@ -277,9 +238,237 @@ polygon <- function(edges){
   }
   vs
 }
-polygon(face_edges)
+polygonize(face_edges)
 ## [1] 2 4 8 6
 ```
+
+Alternatively and better, you can apply the function `hullSummary` to
+the *triangulated* convex hull:
+
+``` r
+hullSummary(thull)
+## $vertices
+##   [,1] [,2] [,3]
+## 2    0    0    0
+## 3    0    0    1
+## 4    0    1    0
+## 5    0    1    1
+## 6    1    0    0
+## 7    1    0    1
+## 8    1    1    0
+## 9    1    1    1
+## 
+## $triangles
+## list()
+## 
+## $otherfacets
+## $otherfacets[[1]]
+## $otherfacets[[1]]$family
+## [1] 0
+## 
+## $otherfacets[[1]]$facetids
+## [1] 1 2
+## 
+## $otherfacets[[1]]$edges
+##      [,1] [,2]
+## [1,] "2"  "4" 
+## [2,] "4"  "8" 
+## [3,] "8"  "6" 
+## [4,] "6"  "2" 
+## 
+## 
+## $otherfacets[[2]]
+## $otherfacets[[2]]$family
+## [1] 2
+## 
+## $otherfacets[[2]]$facetids
+## [1] 3 4
+## 
+## $otherfacets[[2]]$edges
+##      [,1] [,2]
+## [1,] "2"  "3" 
+## [2,] "3"  "7" 
+## [3,] "7"  "6" 
+## [4,] "6"  "2" 
+## 
+## 
+## $otherfacets[[3]]
+## $otherfacets[[3]]$family
+## [1] 4
+## 
+## $otherfacets[[3]]$facetids
+## [1] 5 6
+## 
+## $otherfacets[[3]]$edges
+##      [,1] [,2]
+## [1,] "6"  "7" 
+## [2,] "7"  "9" 
+## [3,] "9"  "8" 
+## [4,] "8"  "6" 
+## 
+## 
+## $otherfacets[[4]]
+## $otherfacets[[4]]$family
+## [1] 6
+## 
+## $otherfacets[[4]]$facetids
+## [1] 7 8
+## 
+## $otherfacets[[4]]$edges
+##      [,1] [,2]
+## [1,] "2"  "3" 
+## [2,] "3"  "5" 
+## [3,] "5"  "4" 
+## [4,] "4"  "2" 
+## 
+## 
+## $otherfacets[[5]]
+## $otherfacets[[5]]$family
+## [1] 8
+## 
+## $otherfacets[[5]]$facetids
+## [1]  9 10
+## 
+## $otherfacets[[5]]$edges
+##      [,1] [,2]
+## [1,] "4"  "5" 
+## [2,] "5"  "9" 
+## [3,] "9"  "8" 
+## [4,] "8"  "4" 
+## 
+## 
+## $otherfacets[[6]]
+## $otherfacets[[6]]$family
+## [1] 10
+## 
+## $otherfacets[[6]]$facetids
+## [1] 11 12
+## 
+## $otherfacets[[6]]$edges
+##      [,1] [,2]
+## [1,] "3"  "5" 
+## [2,] "5"  "9" 
+## [3,] "9"  "7" 
+## [4,] "7"  "3" 
+## 
+## 
+## 
+## attr(,"facets")
+## [1] "0 triangular facet, 6 other facets"
+```
+
+## Plotting a 3-dimensional hull
+
+The package provides the function `plotConvexHull3d` to plot a
+*triangulated* 3-dimensional hull with **rgl**. Let’s take an
+icosidodecahedron as example:
+
+``` r
+library(cxhull)
+library(rgl)
+# icosidodecahedron
+phi <- (1+sqrt(5))/2
+vs1 <- rbind(
+  c(0, 0, 2*phi),
+  c(0, 2*phi, 0),
+  c(2*phi, 0, 0)
+)
+vs1 <- rbind(vs1, -vs1)
+vs2 <- rbind(
+  c( 1,  phi,  phi^2),
+  c( 1,  phi, -phi^2),
+  c( 1, -phi,  phi^2),
+  c(-1,  phi,  phi^2),
+  c( 1, -phi, -phi^2),
+  c(-1,  phi, -phi^2),
+  c(-1, -phi,  phi^2),
+  c(-1, -phi, -phi^2)
+)
+vs2 <- rbind(vs2, vs2[, c(2, 3, 1)], vs2[, c(3, 1, 2)])
+points <- rbind(vs1, vs2)
+# computes the triangulated convex hull:
+hull <- cxhull(points, triangulate = TRUE)
+```
+
+``` r
+# plot:
+open3d(windowRect = c(50, 50, 562, 562))
+view3d(10, 80, zoom = 0.7)
+plotConvexHull3d(
+  hull, facesColor = "orangered", edgesColor = "yellow",
+  tubesRadius = 0.06, spheresRadius = 0.08
+)
+```
+
+![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/icosidodecahedron.png)
+
+## Facets orientation
+
+The `plotConvexHull3d` function calls the `TrianglesXYZ` function, which
+takes care of the orientation of the facets. Indeed, with the code
+below, we see the whole convex hull while we hide the back side of the
+triangles:
+
+``` r
+triangles <- TrianglesXYZ(hull)
+open3d(windowRect = c(50, 50, 562, 562))
+view3d(10, 80, zoom = 0.7)
+triangles3d(triangles, color = "green", back = "culled")
+```
+
+![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/icosidodecahedron_culled.png)
+
+The `orientation` field of a facet indicates its orientation (`1` or
+`-1`).
+
+## Plotting with multiple colors
+
+There are three possiblities for the `facesColor` argument of the
+`plotConvexHull3d` function. We have already seen the first one: a
+single color. The second possibiity is to assign a color to each
+triangle of the hull. There are 56 triangles:
+
+``` r
+length(hull[["facets"]])
+## [1] 56
+```
+
+So we specify 56 colors:
+
+``` r
+library(randomcoloR)
+colors <- distinctColorPalette(56)
+open3d(windowRect = c(50, 50, 562, 562))
+view3d(10, 80, zoom = 0.7)
+plotConvexHull3d(
+  hull, facesColor = colors, edgesColor = "yellow",
+  tubesRadius = 0.06, spheresRadius = 0.08
+)
+```
+
+![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/icosidodecahedron_color_triangles.png)
+
+The third possibility is to assign a color to each face of the convex
+hull. There are 32 faces:
+
+``` r
+summary <- hullSummary(hull)
+attr(summary, "facets")
+## [1] "20 triangular facets, 12 other facets"
+```
+
+``` r
+library(randomcoloR)
+colors <- distinctColorPalette(32)
+open3d(windowRect = c(50, 50, 562, 562))
+view3d(10, 80, zoom = 0.7)
+plotConvexHull3d(
+  hull, facesColor = colors, edgesColor = "yellow",
+  tubesRadius = 0.06, spheresRadius = 0.08
+)
+```
+
+![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/icosidodecahedron_color_faces.png)
 
 # A four-dimensional example
 

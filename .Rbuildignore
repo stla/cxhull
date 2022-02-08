@@ -8,7 +8,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^TODO\.txt$
-^README\.md$
 ^README\.Rmd$
 ^README\.html$
 ^cran-comments\.md$
