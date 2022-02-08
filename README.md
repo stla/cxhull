@@ -8,7 +8,7 @@ cxhull
 <!-- badges: end -->
 
 The purpose of the `cxhull` package is to compute the convex hull of a
-set of points in arbitrary dimension. It contains only one function:
+set of points in arbitrary dimension. Its main function is named
 `cxhull`.
 
 The output of the `cxhull` function is a list with the following fields.
@@ -469,6 +469,21 @@ plotConvexHull3d(
 ```
 
 ![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/icosidodecahedron_color_faces.png)
+
+Finally, instead of using the `facesColor` argument, you can use the
+`palette` argument, which allows to decorate the faces with a color
+gradient.
+
+``` r
+open3d(windowRect = c(50, 50, 562, 562))
+view3d(10, 80, zoom = 0.7)
+plotConvexHull3d(
+  hull, palette = hcl.colors(256, "BuPu"), bias = 0.25, 
+  edgesColor = "yellow", tubesRadius = 0.06, spheresRadius = 0.08
+)
+```
+
+![](https://raw.githubusercontent.com/stla/cxhull/master/inst/images/icosidodecahedron_color_gradient.png)
 
 # A four-dimensional example
 
