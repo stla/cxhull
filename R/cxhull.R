@@ -39,10 +39,10 @@ cxhull <- function(points, triangulate=FALSE){
     cat(readLines(errfile), sep="\n")
     stop(e)
   })
-  hull$volume <- 1/dimension * 
-    sum(sapply(hull$facets,
+  hull[["volume"]] <- 1/dimension * 
+    sum(sapply(hull[["facets"]],
                function(f) crossprod(f[["center"]], f[["normal"]])) *
-          sapply(hull$facets, "[[", "volume"))
+          sapply(hull[["facets"]], "[[", "volume"))
   if(dimension == 3L){
     attr(hull, "3d") <- TRUE
   }
@@ -88,7 +88,7 @@ TrianglesXYZ <- function(hull){
   Vertices <- VerticesXYZ(hull)
   if(!isTRUE(attr(hull, "triangulate"))){
     stop(
-      "You didn't compute the convex hull with the option `triangulate=TRUE`"
+      "You didn't compute the convex hull with the option `triangulate=TRUE`."
     )
   }
   Facets <- hull[["facets"]]
@@ -99,6 +99,8 @@ TrianglesXYZ <- function(hull){
     rep(1L:ntriangles, each = 3L)
   )
   colnames(triangles) <- c("x", "y", "z")
+  #triangles <- cbind(as.data.frame(triangles), family = NA_integer_)
+  families <- rep(NA_integer_, ntriangles)
   for(i in 1L:ntriangles){
     facet <- Facets[[i]]
     vertices <- as.character(facet[["vertices"]])
@@ -106,7 +108,12 @@ TrianglesXYZ <- function(hull){
       vertices <- vertices[c(1L, 3L, 2L)]
     }
     triangles[(3L*i-2L):(3L*i), ] <- Vertices[vertices, ]
+    family <- facet[["family"]]
+    if(!is.na(family)){
+      families[i] <- family
+    }
   }
+  attr(triangles, "families") <- families
   triangles
 }
 
@@ -144,7 +151,7 @@ EdgesAB <- function(hull){
   }
   if(!isTRUE(attr(hull, "triangulate"))){
     stop(
-      "You didn't compute the convex hull with the option `triangulate=TRUE`"
+      "You didn't compute the convex hull with the option `triangulate=TRUE`."
     )
   }
   ridges <- hull[["ridges"]]
@@ -173,7 +180,12 @@ EdgesAB <- function(hull){
 #'   with the option \code{triangulate=TRUE}
 #' @param edgesAsTubes Boolean, whether to draw the edges as tubes
 #' @param verticesAsSpheres Boolean, whether to draw the vertices as spheres
-#' @param facesColor the color for the faces
+#' @param facesColor the color(s) for the faces; there are three possibilities: 
+#'   a single color, a vector of colors with length the number of triangles, 
+#'   in which case one color is assigned per triangle, or a vector of colors 
+#'   with length the number of faces, after merging the triangles, in 
+#'   which case one color is assigned per face; use \code{\link{hullSummary}} 
+#'   to know the number of faces
 #' @param edgesColor the color for the edges 
 #' @param tubesRadius the radius of the tubes when \code{edgesAsTubes=TRUE}
 #' @param spheresRadius the radius of the spheres when 
@@ -199,7 +211,38 @@ plotConvexHull3d <- function(
 ){
   edges <- EdgesAB(hull)
   trueEdges <- edges[edges[, 3L] == "yes", c(1L, 2L)]
-  triangles3d(TrianglesXYZ(hull), color = facesColor)
+  ncolors <- length(facesColor) 
+  if(ncolors == 1L){
+    triangles3d(TrianglesXYZ(hull), color = facesColor)
+  }else{
+    nTriangles <- length(hull[["facets"]])
+    trianglesxyz <- TrianglesXYZ(hull)
+    triangles <- split(trianglesxyz, gl(nTriangles, 3L))
+    if(ncolors == nTriangles){
+      for(i in 1L:nTriangles){
+        triangles3d(
+          matrix(triangles[[i]], nrow = 3L, ncol = 3L), color = facesColor[i]
+        )
+      }
+    }else{
+      families <- as.character(attr(trianglesxyz, "families"))
+      families[is.na(families)] <- 
+        paste0("NA", seq_along(which(is.na(families))))
+      ufamilies <- unique(families)
+      if(ncolors == length(ufamilies)){
+        names(facesColor) <- ufamilies
+        for(i in 1L:nTriangles){
+          family <- families[i]
+          triangles3d(
+            matrix(triangles[[i]], nrow = 3L, ncol = 3L), 
+            color = facesColor[family]
+          )
+        }
+      }else{
+        warning("Invalid number of colors.")
+      }
+    }
+  }
   Vertices <- VerticesXYZ(hull)
   for(i in 1L:nrow(trueEdges)){
     edge <- trueEdges[i, ]
@@ -298,7 +341,7 @@ hullSummary <- function(hull){
   }
   if(!isTRUE(attr(hull, "triangulate"))){
     stop(
-      "You didn't compute the convex hull with the option `triangulate=TRUE`"
+      "You didn't compute the convex hull with the option `triangulate=TRUE`."
     )
   }
   
@@ -337,7 +380,7 @@ hullSummary <- function(hull){
     )
   }, simplify = FALSE)
   
-  Vertices <- lapply(unname(hull$vertices), `[`, c("id", "point"))
+  Vertices <- lapply(unname(hull[["vertices"]]), `[`, c("id", "point"))
   vertices <- t(vapply(Vertices, `[[`, numeric(3L), "point"))
   rownames(vertices) <- as.character(vapply(Vertices, `[[`, integer(1L), "id"))
   

@@ -23,7 +23,12 @@ with the option \code{triangulate=TRUE}}
 
 \item{verticesAsSpheres}{Boolean, whether to draw the vertices as spheres}
 
-\item{facesColor}{the color for the faces}
+\item{facesColor}{the color(s) for the faces; there are three possibilities: 
+a single color, a vector of colors with length the number of triangles, 
+in which case one color is assigned per triangle, or a vector of colors 
+with length the number of faces, after merging the triangles, in 
+which case one color is assigned per face; use \code{\link{hullSummary}} 
+to know the number of faces}
 
 \item{edgesColor}{the color for the edges}
 
