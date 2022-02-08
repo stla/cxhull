@@ -344,20 +344,16 @@ hullSummary <- function(hull){
       "You didn't compute the convex hull with the option `triangulate=TRUE`."
     )
   }
-  
   families <- vapply(hull[["facets"]], `[[`, integer(1L), "family")
-  
   for(i in seq_along(hull[["facets"]])){
     attr(hull[["facets"]][[i]][["edges"]], "id") <- i
   }
-  
   otherFacets <- Filter(function(x) !is.na(x[["family"]]), hull[["facets"]])
-  
   Other <- tapply(lapply(lapply(
     otherFacets, `[[`, "edges"
   ),
   identity
-  ), na.omit(families), function(x){
+  ), families[!is.na(families)], function(x){
     ids <- vapply(x, attr, integer(1L), "id")
     list(
       family   = families[ids[1L]],
