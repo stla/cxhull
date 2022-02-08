@@ -9,6 +9,7 @@ plotConvexHull3d(
   edgesAsTubes = TRUE,
   verticesAsSpheres = TRUE,
   facesColor = "navy",
+  palette = NULL,
   edgesColor = "gold",
   tubesRadius = 0.03,
   spheresRadius = 0.05,

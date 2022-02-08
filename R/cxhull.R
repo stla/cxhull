@@ -173,6 +173,15 @@ EdgesAB <- function(hull){
   edges
 }
 
+#' @importFrom Rvcg vcgIsotropicRemeshing
+#' @noRd
+refineMesh <- function(mesh){
+  vcgIsotropicRemeshing(
+    vcgIsotropicRemeshing(mesh, TargetLen = 0), 
+    TargetLen = 0
+  )
+}
+
 #' @title Plot triangulated 3D convex hull
 #' @description Plot a triangulated 3D convex hull with \strong{rgl}.
 #'
@@ -196,7 +205,9 @@ EdgesAB <- function(hull){
 #' @return No value.
 #' @export
 #'
-#' @importFrom rgl triangles3d cylinder3d shade3d lines3d spheres3d
+#' @importFrom rgl triangles3d cylinder3d shade3d lines3d spheres3d as.mesh3d
+#' @importFrom Morpho mergeMeshes
+#' @importFrom grDevices colorRamp rgb
 #'
 #' @examples library(cxhull)
 #' library(rgl)
@@ -206,41 +217,78 @@ EdgesAB <- function(hull){
 #' plotConvexHull3d(hull)
 plotConvexHull3d <- function(
   hull, edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
-  facesColor = "navy", edgesColor = "gold", 
+  facesColor = "navy", palette = NULL, edgesColor = "gold", 
   tubesRadius = 0.03, spheresRadius = 0.05, spheresColor = edgesColor
 ){
   edges <- EdgesAB(hull)
   trueEdges <- edges[edges[, 3L] == "yes", c(1L, 2L)]
-  ncolors <- length(facesColor) 
-  if(ncolors == 1L){
-    triangles3d(TrianglesXYZ(hull), color = facesColor)
+  if(is.null(palette)){
+    ncolors <- length(facesColor) 
+    if(ncolors == 1L){
+      triangles3d(TrianglesXYZ(hull), color = facesColor)
+    }else{
+      nTriangles <- length(hull[["facets"]])
+      trianglesxyz <- TrianglesXYZ(hull)
+      triangles <- split(trianglesxyz, gl(nTriangles, 3L))
+      if(ncolors == nTriangles){
+        for(i in 1L:nTriangles){
+          triangles3d(
+            matrix(triangles[[i]], nrow = 3L, ncol = 3L), color = facesColor[i]
+          )
+        }
+      }else{
+        families <- as.character(attr(trianglesxyz, "families"))
+        families[is.na(families)] <- 
+          paste0("NA", seq_along(which(is.na(families))))
+        ufamilies <- unique(families)
+        if(ncolors == length(ufamilies)){
+          names(facesColor) <- ufamilies
+          for(i in 1L:nTriangles){
+            family <- families[i]
+            triangles3d(
+              matrix(triangles[[i]], nrow = 3L, ncol = 3L), 
+              color = facesColor[family]
+            )
+          }
+        }else{
+          warning("Invalid number of colors.")
+        }
+      }
+    }
   }else{
     nTriangles <- length(hull[["facets"]])
     trianglesxyz <- TrianglesXYZ(hull)
     triangles <- split(trianglesxyz, gl(nTriangles, 3L))
-    if(ncolors == nTriangles){
-      for(i in 1L:nTriangles){
-        triangles3d(
-          matrix(triangles[[i]], nrow = 3L, ncol = 3L), color = facesColor[i]
-        )
-      }
-    }else{
-      families <- as.character(attr(trianglesxyz, "families"))
-      families[is.na(families)] <- 
-        paste0("NA", seq_along(which(is.na(families))))
-      ufamilies <- unique(families)
-      if(ncolors == length(ufamilies)){
-        names(facesColor) <- ufamilies
-        for(i in 1L:nTriangles){
-          family <- families[i]
-          triangles3d(
-            matrix(triangles[[i]], nrow = 3L, ncol = 3L), 
-            color = facesColor[family]
-          )
-        }
+    families <- as.character(attr(trianglesxyz, "families"))
+    families[is.na(families)] <- 
+      paste0("NA", seq_along(which(is.na(families))))
+    ufamilies <- unique(families)
+    mergedFaces <- rep(list(list()), length(ufamilies))
+    centers <- vector("list", length(ufamilies))
+    names(mergedFaces) <- names(centers) <- ufamilies
+    for(i in 1L:nTriangles){
+      family <- families[i]
+      mesh <- as.mesh3d(matrix(triangles[[i]], nrow = 3L, ncol = 3L))
+      mergedFaces[[family]] <- c(mergedFaces[[family]], list(mesh))
+    }
+    for(family in ufamilies){
+      tomerge <- mergedFaces[[family]]
+      if(length(tomerge) > 1L){
+        mergedFaces[[family]] <- refineMesh(mergeMeshes(tomerge)) -> mesh
       }else{
-        warning("Invalid number of colors.")
+        mergedFaces[[family]] <- refineMesh(tomerge[[1L]]) -> mesh
       }
+      vertices <- mesh[["vb"]][-4L, ]
+      centers[[family]] <- rowMeans(vertices) -> center
+      vertices <- sweep(vertices, 1L, center, `-`)
+      dists <- sqrt(apply(vertices, 2L, crossprod))
+      dists <- (dists - min(dists)) / diff(range(dists))
+      fpalette <- colorRamp(palette)
+      RGB <- fpalette(dists)
+      colors <- rgb(RGB[, 1L], RGB[, 2L], RGB[, 3L], maxColorValue = 255)
+      mesh[["material"]][["color"]] <- colors
+      shade3d(mesh)
+      spheres3d(center, radius = 0.05, color="red")
     }
   }
   Vertices <- VerticesXYZ(hull)
