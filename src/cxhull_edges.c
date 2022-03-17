@@ -80,7 +80,6 @@ SetOfSitesT cxhullEdges(double* points,
 
   if(!exitcode[0]) {  // 0 if no error from qhull
 
-    printf("no qhull error");
     unsigned nalledgesdouble = 0;
     // all vertices
     unsigned nvertices = qh->num_vertices;
@@ -92,7 +91,6 @@ SetOfSitesT cxhullEdges(double* points,
       FORALLvertices {
         // vertex id and coordinates
         unsigned vertex_id = qh_pointid(qh, vertex->point);
-        printf("vertexid: %d", vertex_id);
         vertices[i_vertex].id = vertex_id;
         vertices[i_vertex].point = getpoint(points, dim, vertex_id);
         // vertices[i_vertex].nneighsvertices = 0;
@@ -103,11 +101,8 @@ SetOfSitesT cxhullEdges(double* points,
           facetT *neighbor, **neighborp;
           unsigned i_neighbor = 0;
           FOREACHneighbor_(vertex) {
-            // vertices[i_vertex].neighfacets[i_neighbor] = neighbor->id;
-            printf("neighbor i: %d\n", i_neighbor);
             i_neighbor++;
             if(neighbor->simplicial) {
-              printf("neighbor simplicial\n");
               // vertices[i_vertex].nneighsvertices += qh_setsize(qh,
               // neighbor->vertices);
               vertexT *v, **vp;
@@ -117,15 +112,12 @@ SetOfSitesT cxhullEdges(double* points,
                   unsigned pushed;
                   appendu(v_id, &neighs, nneighs, &pushed);
                   if(pushed) {
-                    printf("pushed");
                     nneighs++;
                   }
                 }
               }
             } else {
               qh_makeridges(qh, neighbor);
-              // vertexT *v, **vp;
-              // FOREACHsetelement_(vertexT, neighbor->vertices, v) {
               ridgeT *r, **rp;
               FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r) {
                 vertexT *v, **vp;
@@ -135,13 +127,11 @@ SetOfSitesT cxhullEdges(double* points,
                     unsigned pushed;
                     appendu(v_id, &neighs, nneighs, &pushed);
                     if(pushed) {
-                      printf("pushed u");
                       nneighs++;
                     }
                   }
                 }
               }
-              // }
             }
           }
           vertices[i_vertex].neighvertices = neighs;
