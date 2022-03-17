@@ -1,4 +1,7 @@
 /* author: Stéphane Laurent */
+#ifndef UTILSHEADER
+#define UTILSHEADER
+
 
 int cmpfunc(const void*, const void*);
 int cmpfuncdbl(const void*, const void*);
@@ -19,3 +22,5 @@ double dotproduct(double*, double*, unsigned);
 unsigned* uzeros(unsigned);
 
 double squaredDistance(double*, double*, unsigned);
+
+#endif

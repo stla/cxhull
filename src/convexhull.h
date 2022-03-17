@@ -1,4 +1,7 @@
 /* author: Stéphane Laurent */
+#ifndef CXHULLHEADER
+#define CXHULLHEADER
+
 typedef struct Vertex {
   unsigned id;
   double*  point;
@@ -19,6 +22,11 @@ typedef struct SetOfVertices {
     VertexT*   vertices;
     unsigned   nvertices;
 } SetOfVerticesT;
+
+typedef struct SetOfFullVertices {
+  FullVertexT*   vertices;
+  unsigned       nvertices;
+} SetOfFullVerticesT;
 
 typedef struct Ridge {
     VertexT*   vertices;
@@ -59,3 +67,5 @@ typedef struct ConvexHull {
   unsigned**   edges;
   unsigned     nedges;
 } ConvexHullT;
+
+#endif

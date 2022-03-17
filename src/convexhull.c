@@ -1,7 +1,5 @@
 /* author: Stéphane Laurent */
-#include <R.h>
-#include <Rdefines.h>
-#include <Rinternals.h>
+#include "Rheaders.h"
 #define qh_QHimport
 #include "convexhull.h"
 #include "qhull_ra.h"
