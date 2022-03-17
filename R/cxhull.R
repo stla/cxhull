@@ -63,6 +63,11 @@ cxhull <- function(points, triangulate = FALSE){
 #' @export
 #' @useDynLib cxhull, .registration = TRUE
 #' @examples library(cxhull)
+#' VE <- cxhullEdges(hexacosichoron, orderEdges = FALSE)
+#' edge <- VE[["edges"]][sample.int(720L, 1L), ]
+#' A <- hexacosichoron[edge[1L], ]
+#' B <- hexacosichoron[edge[2L], ]
+#' sqrt(c(crossprod(A - B))) # edge length: 2/phi
 cxhullEdges <- function(points, orderEdges = TRUE){
   stopifnot(isBoolean(orderEdges))
   if(!is.matrix(points) || !is.numeric(points)){

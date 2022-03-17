@@ -20,4 +20,9 @@ Computes the vertices and the edges of the convex hull of a set
 }
 \examples{
 library(cxhull)
+VE <- cxhullEdges(hexacosichoron, orderEdges = FALSE)
+edge <- VE[["edges"]][sample.int(720L, 1L), ]
+A <- hexacosichoron[edge[1L], ]
+B <- hexacosichoron[edge[2L], ]
+sqrt(c(crossprod(A - B))) # edge length: 2/phi
 }
