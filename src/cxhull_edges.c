@@ -20,32 +20,34 @@ unsigned** getEdges(SiteT* vertices, unsigned nvertices, unsigned outlength) {
     out[i] = malloc(2 * sizeof(unsigned));
     out[i][0] = id0;
     out[i][1] = neighs_v0[i];
-    qsortu(out[i], 2);
+    // qsortu(out[i], 2);
   }
   for(unsigned k = 1; k < nvertices; k++) {
     SiteT vk = vertices[k];
     unsigned idk = vk.id;
     unsigned* neighs_vk = vk.neighvertices;
     unsigned nk = vk.nneighvertices;
-    unsigned ids[2];
+    // unsigned ids[2];
+    unsigned ids0 = idk;
     for(unsigned i = 0; i < nk; i++) {
-      ids[0] = idk;
-      ids[1] = neighs_vk[i];
-      qsortu(ids, 2);
-      unsigned j;
-      for(j = 0; j < n; j++) {
-        if(ids[0] == out[j][0] && ids[1] == out[j][1]) {
+      // qsortu(ids, 2);
+      unsigned ids1 = neighs_vk[i];
+      if(ids1 > ids0) {
+        unsigned j;
+        for(j = 0; j < n; j++) {
+          if(ids0 == out[j][0] && ids1 == out[j][1]) {
+            break;
+          }
+        }
+        if(j == n) {
+          out[n] = malloc(2 * sizeof(unsigned));
+          out[n][0] = ids0;
+          out[n][1] = ids1;
+          n++;
+        }
+        if(n == outlength) {
           break;
         }
-      }
-      if(j == n) {
-        out[n] = malloc(2 * sizeof(unsigned));
-        out[n][0] = ids[0];
-        out[n][1] = ids[1];
-        n++;
-      }
-      if(n == outlength) {
-        break;
       }
     }
     if(n == outlength) {
@@ -155,7 +157,7 @@ SetOfSitesT cxhullEdges(double* points,
     // all edges
     unsigned nedges = nalledgesdouble / 2;
     unsigned** edges = getEdges(vertices, nvertices, nedges);
-    if(order_edges){
+    if(order_edges) {
       qsort(edges, nedges, sizeof(unsigned*), cmpedges);
     }
 
@@ -235,7 +237,7 @@ SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
           p)[i + n * j];  // could have been REAL(p) if p had been transposed
 
   unsigned orderEdges = INTEGER(o)[0];
-  
+
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
   SetOfSitesT vset = cxhullEdges(points, dim, n, orderEdges, &exitcode, e);
@@ -244,9 +246,9 @@ SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
   }
 
   unsigned nvertices = vset.nsites;
-  SiteT* vertices    = vset.sites;
-  unsigned nedges    = vset.nedges;
-  unsigned** edges   = vset.edges;
+  SiteT* vertices = vset.sites;
+  unsigned nedges = vset.nedges;
+  unsigned** edges = vset.edges;
 
   SEXP out, names, R_vertices, vnames, R_edges;
 
@@ -268,7 +270,7 @@ SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
     INTEGER(R_edges)[i] = 1 + edges[i][0];
     INTEGER(R_edges)[i + nedges] = 1 + edges[i][1];
   }
-  
+
   PROTECT(out = allocVector(VECSXP, 2));
   nprotect++;
   SET_VECTOR_ELT(out, 0, R_vertices);
@@ -279,7 +281,7 @@ SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
   SET_VECTOR_ELT(names, 0, mkChar("vertices"));
   SET_VECTOR_ELT(names, 1, mkChar("edges"));
   setAttrib(out, R_NamesSymbol, names);
-  
+
   UNPROTECT(nprotect);
   return out;
 }
