@@ -9,11 +9,11 @@
 
 /* .Call calls */
 extern SEXP cxhull_(SEXP, SEXP, SEXP);
-extern SEXP cxhullEdges_(SEXP, SEXP);
+extern SEXP cxhullEdges_(SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"cxhull_", (DL_FUNC) &cxhull_, 3},
-    {"cxhullEdges_", (DL_FUNC) &cxhullEdges_, 2},
+    {"cxhullEdges_", (DL_FUNC) &cxhullEdges_, 3},
     {NULL, NULL, 0}
 };
 
