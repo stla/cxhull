@@ -18,7 +18,8 @@
 #'  c(1,1,1)
 #' )
 #' cxhull(points)
-cxhull <- function(points, triangulate=FALSE){
+cxhull <- function(points, triangulate = FALSE){
+  stopifnot(isBoolean(triangulate))
   if(!is.matrix(points) || !is.numeric(points)){
     stop("`points` must be a numeric matrix")
   }
@@ -32,17 +33,18 @@ cxhull <- function(points, triangulate=FALSE){
   if(any(is.na(points))){
     stop("missing values are not allowed")
   }
-  errfile <- tempfile(fileext=".txt")
+  storage.mode(points) <- "double"
+  errfile <- tempfile(fileext = ".txt")
   hull <- tryCatch({
     .Call("cxhull_", points, as.integer(triangulate), errfile)
   }, error = function(e){
-    cat(readLines(errfile), sep="\n")
+    cat(readLines(errfile), sep = "\n")
     stop(e)
   })
   hull[["volume"]] <- 1/dimension * 
     sum(sapply(hull[["facets"]],
                function(f) crossprod(f[["center"]], f[["normal"]])) *
-          sapply(hull[["facets"]], "[[", "volume"))
+          sapply(hull[["facets"]], `[[`, "volume"))
   if(dimension == 3L){
     attr(hull, "3d") <- TRUE
   }
@@ -51,6 +53,46 @@ cxhull <- function(points, triangulate=FALSE){
   }
   hull
 }
+
+#' @title Vertices and edges of convex hull
+#' @description Computes the vertices and the edges of the convex hull of a set 
+#'   of points.
+#' @param points numeric matrix, one point per row
+#' @param orderEdges Boolean, whether to order the edges in the output
+#' @return A list with two fields: \code{vertices} and \code{edges}.
+#' @export
+#' @useDynLib cxhull, .registration = TRUE
+#' @examples library(cxhull)
+cxhullEdges <- function(points, orderEdges = TRUE){
+  stopifnot(isBoolean(orderEdges))
+  if(!is.matrix(points) || !is.numeric(points)){
+    stop("`points` must be a numeric matrix")
+  }
+  dimension <- ncol(points)
+  if(dimension < 2L){
+    stop("dimension must be at least 2")
+  }
+  if(nrow(points) <= dimension){
+    stop("insufficient number of points")
+  }
+  if(any(is.na(points))){
+    stop("missing values are not allowed")
+  }
+  storage.mode(points) <- "double"
+  errfile <- tempfile(fileext = ".txt")
+  hullEdges <- tryCatch({
+    .Call("cxhullEdges_", points, as.integer(orderEdges), errfile)
+  }, error = function(e){
+    cat(readLines(errfile), sep = "\n")
+    stop(e)
+  })
+  if(dimension == 3L){
+    attr(hullEdges, "3d") <- TRUE
+  }
+  hullEdges
+}
+
+
 
 #' @title Convex hull vertices
 #' @description The coordinates of the vertices of a 3D convex hull.

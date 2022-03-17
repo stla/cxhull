@@ -59,6 +59,7 @@ unsigned** getEdges(SiteT* vertices, unsigned nvertices, unsigned outlength) {
 SetOfSitesT cxhullEdges(double* points,
                         unsigned dim,
                         unsigned n,
+                        unsigned order_edges,
                         unsigned* exitcode,
                         const char* errfilename) {
   char opts[] = "qhull ";  // option flags for qhull, see qh_opt.htm
@@ -154,7 +155,9 @@ SetOfSitesT cxhullEdges(double* points,
     // all edges
     unsigned nedges = nalledgesdouble / 2;
     unsigned** edges = getEdges(vertices, nvertices, nedges);
-    qsort(edges, nedges, sizeof(unsigned*), cmpedges);
+    if(order_edges){
+      qsort(edges, nedges, sizeof(unsigned*), cmpedges);
+    }
 
     int curlong, totlong;
     qh_freeqhull(qh, !qh_ALL);  // free long memory
@@ -219,7 +222,7 @@ SEXP SiteSXP(SiteT vertex, unsigned dim) {
 }
 
 // main function ---------------------------------------------------------------
-SEXP cxhullEdges_(SEXP p, SEXP errfile) {
+SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
   unsigned nprotect = 0;
 
   unsigned dim = ncols(p);
@@ -231,9 +234,11 @@ SEXP cxhullEdges_(SEXP p, SEXP errfile) {
       points[dim * i + j] = REAL(
           p)[i + n * j];  // could have been REAL(p) if p had been transposed
 
+  unsigned orderEdges = INTEGER(o)[0];
+  
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
-  SetOfSitesT vset = cxhullEdges(points, dim, n, &exitcode, e);
+  SetOfSitesT vset = cxhullEdges(points, dim, n, orderEdges, &exitcode, e);
   if(exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }

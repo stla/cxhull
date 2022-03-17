@@ -1,3 +1,9 @@
+# cxhull 0.4.0.9000
+
+* New function `cxhullEdges`, which computes only the vertices and the edges 
+of a convex hull.
+
+
 # cxhull 0.4.0
 
 * New function `hullSummary`, which returns a summary of a 3D triangulated 
