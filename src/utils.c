@@ -45,6 +45,16 @@ int cmpfunc (const void * a, const void * b) {
 int cmpfuncdbl (const void * a, const void * b) {
    return ( *(double*)a - *(double*)b > 0 ? 1 : -1);
 }
+// - sort edges ----------------------------------------------------------------
+int cmpedges(const void* a, const void* b) {
+  if((*(unsigned**)a)[0] > (*(unsigned**)b)[0]) {
+    return 1;
+  } else if((*(unsigned**)a)[0] == (*(unsigned**)b)[0]) {
+    return (*(unsigned**)a)[1] - (*(unsigned**)b)[1];
+  } else {
+    return -1;
+  }
+}
 void qsortu(unsigned* vector, unsigned length){
   qsort(vector, length, sizeof(unsigned), cmpfunc);
 }

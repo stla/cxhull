@@ -10,8 +10,10 @@ typedef struct Site {
 } SiteT;
 
 typedef struct SetOfSites {
-  SiteT*    sites;
-  unsigned  nsites;
+  SiteT*     sites;
+  unsigned   nsites;
+  unsigned** edges;
+  unsigned   nedges;
 } SetOfSitesT;
 
 #endif

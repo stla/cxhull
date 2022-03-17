@@ -5,6 +5,7 @@
 
 int cmpfunc(const void*, const void*);
 int cmpfuncdbl(const void*, const void*);
+int cmpedges(const void*, const void*);
 void qsortu(unsigned*, unsigned);
 
 double square(double);
