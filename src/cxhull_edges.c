@@ -1,17 +1,22 @@
 /* author: Stéphane Laurent */
 #include "Rheaders.h"
-#include "convexhull.h"
+#include "cxhull_edges.h"
 #include "qhull_ra.h"
 #include "utils.h"
 
+// to use the qsort function - sort vertices according to their ids ------------
+int cmpsites(const void* a, const void* b) {
+  return ((*((SiteT*)a)).id - (*((SiteT*)b)).id);
+}
+
 // main function ---------------------------------------------------------------
-SetOfFullVerticesT cxhullEdges(double* points,
-                               unsigned dim,
-                               unsigned n,
-                               unsigned* exitcode,
-                               const char* errfilename) {
+SetOfSitesT cxhullEdges(double* points,
+                        unsigned dim,
+                        unsigned n,
+                        unsigned* exitcode,
+                        const char* errfilename) {
   char opts[] = "qhull ";  // option flags for qhull, see qh_opt.htm
-  qhT qh_qh;              // Qhull's data structure
+  qhT qh_qh;               // Qhull's data structure
   qhT* qh = &qh_qh;
   QHULL_LIB_CHECK
   boolT ismalloc = False;  // True if qhull should free points in qh_freeqhull()
@@ -29,7 +34,7 @@ SetOfFullVerticesT cxhullEdges(double* points,
     printf("no qhull error");
     // all vertices
     unsigned nvertices = qh->num_vertices;
-    FullVertexT* vertices = malloc(nvertices * sizeof(FullVertexT));
+    SiteT* vertices = malloc(nvertices * sizeof(SiteT));
     {
       qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
       vertexT* vertex;
@@ -44,12 +49,11 @@ SetOfFullVerticesT cxhullEdges(double* points,
 
         {
           unsigned* neighs = malloc(0);
-          unsigned nn = 0;
           unsigned nneighs = 0;
           facetT *neighbor, **neighborp;
           unsigned i_neighbor = 0;
           FOREACHneighbor_(vertex) {
-            //vertices[i_vertex].neighfacets[i_neighbor] = neighbor->id;
+            // vertices[i_vertex].neighfacets[i_neighbor] = neighbor->id;
             printf("neighbor i: %d\n", i_neighbor);
             i_neighbor++;
             if(neighbor->simplicial) {
@@ -57,49 +61,53 @@ SetOfFullVerticesT cxhullEdges(double* points,
               // vertices[i_vertex].nneighsvertices += qh_setsize(qh,
               // neighbor->vertices);
               vertexT *v, **vp;
-              unsigned neighv = 0;
               FOREACHsetelement_(vertexT, neighbor->vertices, v) {
-                // FOREACHvertex_(neighbor->vertices){
-                unsigned pushed;
-                appendu(qh_pointid(qh, v->point), &neighs, nn, &pushed);
-                if(pushed) {
-                  printf("pushed");
-                  nn++;
-                  //(*nn)++;
-                  nneighs++;
+                unsigned v_id = qh_pointid(qh, v->point);
+                if(v_id != vertex_id) {
+                  unsigned pushed;
+                  appendu(v_id, &neighs, nneighs, &pushed);
+                  if(pushed) {
+                    printf("pushed");
+                    nneighs++;
+                  }
                 }
               }
-            }else{
+            } else {
               qh_makeridges(qh, neighbor);
               // vertexT *v, **vp;
               // FOREACHsetelement_(vertexT, neighbor->vertices, v) {
-                ridgeT *r, **rp;
-                FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r){
-                  vertexT *u, **up;
-                  FOREACHsetelement_(vertexT, r->vertices, u){
+              ridgeT *r, **rp;
+              FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r) {
+                vertexT *v, **vp;
+                FOREACHsetelement_(vertexT, r->vertices, v) {
+                  unsigned v_id = qh_pointid(qh, v->point);
+                  if(v_id != vertex_id) {
                     unsigned pushed;
-                    appendu(qh_pointid(qh, u->point), &neighs, nn, &pushed);
+                    appendu(v_id, &neighs, nneighs, &pushed);
                     if(pushed) {
                       printf("pushed u");
-                      nn++;
                       nneighs++;
                     }
                   }
                 }
+              }
               // }
             }
           }
           vertices[i_vertex].neighvertices = neighs;
-          vertices[i_vertex].nneighsvertices = nneighs;
+          vertices[i_vertex].nneighvertices = nneighs;
           i_vertex++;
         }
       }
     }
+
+    qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
+
     int curlong, totlong;
     qh_freeqhull(qh, !qh_ALL);  // free long memory
     qh_memfreeshort(qh, &curlong,
                     &totlong);  // free short memory and memory allocator
-    SetOfFullVerticesT vset = {.vertices = vertices, .nvertices = nvertices};
+    SetOfSitesT vset = {.sites = vertices, .nsites = nvertices};
 
     return vset;
   } else {
@@ -115,8 +123,8 @@ SetOfFullVerticesT cxhullEdges(double* points,
 // ----------------------------------- R ------------------------------------ //
 // -------------------------------------------------------------------------- //
 
-// FullVertexT to SEXP ---------------------------------------------------------
-SEXP VertexSXPlight(FullVertexT vertex, unsigned dim) {
+// SiteT to SEXP ---------------------------------------------------------
+SEXP SiteSXP(SiteT vertex, unsigned dim) {
   unsigned nprotect = 0;
   SEXP R_vertex, names, id, point, neighvertices;
 
@@ -130,7 +138,7 @@ SEXP VertexSXPlight(FullVertexT vertex, unsigned dim) {
     REAL(point)[i] = vertex.point[i];
   }
 
-  unsigned nneighvertices = vertex.nneighsvertices;
+  unsigned nneighvertices = vertex.nneighvertices;
   PROTECT(neighvertices = allocVector(INTSXP, nneighvertices));
   nprotect++;
   for(unsigned i = 0; i < nneighvertices; i++) {
@@ -169,22 +177,22 @@ SEXP cxhullEdges_(SEXP p, SEXP errfile) {
 
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
-  SetOfFullVerticesT vset = cxhullEdges(points, dim, n, &exitcode, e);
+  SetOfSitesT vset = cxhullEdges(points, dim, n, &exitcode, e);
   if(exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }
 
-  unsigned nvertices = vset.nvertices;
-  FullVertexT* vertices = vset.vertices;
+  unsigned nvertices = vset.nsites;
+  SiteT* vertices = vset.sites;
 
-  SEXP out, names, R_vertices, vnames;
+  SEXP R_vertices, vnames;
 
   PROTECT(R_vertices = allocVector(VECSXP, nvertices));
   PROTECT(vnames = allocVector(STRSXP, nvertices));
   nprotect += 2;
   for(unsigned i = 0; i < nvertices; i++) {
     SEXP vertex;
-    PROTECT(vertex = VertexSXPlight(vertices[i], dim));
+    PROTECT(vertex = SiteSXP(vertices[i], dim));
     nprotect++;
     SET_VECTOR_ELT(R_vertices, i, vertex);
     SET_STRING_ELT(vnames, i, Rf_asChar(VECTOR_ELT(vertex, 0)));
