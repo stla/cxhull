@@ -125,5 +125,3 @@ hexacosichoron <- rbind(
   c( 0.0   , 1/phi , 1.0   , phi    )
 )
 
-usethis::use_data(hexacosichoron, overwrite = TRUE)
-

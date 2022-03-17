@@ -12,6 +12,7 @@ Description: Computes the convex hull in arbitrary dimension, based on the Qhull
 License: GPL-3
 Encoding: UTF-8
 Imports: rgl, Rvcg, Morpho, grDevices 
+Suggests: colorspace
 URL: https://github.com/stla/cxhull
 BugReports: https://github.com/stla/cxhull/issues
 RoxygenNote: 7.1.2

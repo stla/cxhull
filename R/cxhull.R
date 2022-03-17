@@ -64,10 +64,58 @@ cxhull <- function(points, triangulate = FALSE){
 #' @useDynLib cxhull, .registration = TRUE
 #' @examples library(cxhull)
 #' VE <- cxhullEdges(hexacosichoron, orderEdges = FALSE)
-#' edge <- VE[["edges"]][sample.int(720L, 1L), ]
+#' edges <- VE[["edges"]]
+#' edge <- edges[sample.int(720L, 1L), ]
 #' A <- hexacosichoron[edge[1L], ]
 #' B <- hexacosichoron[edge[2L], ]
-#' sqrt(c(crossprod(A - B))) # edge length: 2/phi
+#' sqrt(c(crossprod(A - B))) # this is 2/phi
+#' # Now let's project the polytope to the H4 Coxeter plane 
+#' phi <- (1 + sqrt(5)) / 2
+#' u1 <- c(
+#'   0, 
+#'   2*phi*sin(pi/30), 
+#'   0, 
+#'   1
+#' )
+#' u2 <- c(
+#'   2*phi*sin(pi/15), 
+#'   0, 
+#'   2*sin(2*pi/15), 
+#'   0
+#' )
+#' u1 <- u1 / sqrt(c(crossprod(u1)))
+#' u2 <- u2 / sqrt(c(crossprod(u2)))
+#' # projections to the Coxeter plane
+#' proj <- function(v){
+#'   c(c(crossprod(v, u1)), c(crossprod(v, u2)))
+#' }
+#' points <- t(apply(hexacosichoron, 1L, proj))
+#' # we will assign a color to each edge  
+#' #   according to the norms of its two vertices
+#' norms2 <- round(apply(points, 1L, crossprod), 1L)
+#' ( tbl <- table(norms2) )
+#' #> 0.4 1.6 2.4 3.6 
+#' #>  30  30  30  30 
+#' values <- as.numeric(names(tbl))
+#' grd <- as.matrix(expand.grid(values, values)) 
+#' grd <- grd[grd[, 1L] <= grd[, 2L], ]
+#' pairs <- apply(grd, 1L, paste0, collapse = "-")
+#' colors <- hcl.colors(nrow(grd), palette = "Hawaii", rev = TRUE)
+#' colors <- colorspace::darken(colors, amount = 0.3)
+#' names(colors) <- pairs
+#' # plot ####
+#' opar <- par(mar = c(0, 0, 0, 0))
+#' plot(
+#'   points[!duplicated(points), ], pch = 19, cex = 0.3, asp = 1, 
+#'   axes = FALSE, xlab = NA, ylab = NA
+#' )
+#' for(i in 1L:nrow(edges)){
+#'   twopoints <- points[edges[i, ], ]
+#'   nrms2 <- round(sort(apply(twopoints, 1L, crossprod)), 1L)
+#'   pair <- paste0(nrms2, collapse = "-")
+#'   lines(twopoints, lwd = 0.5, col = colors[pair])
+#' }
+#' par(opar)
 cxhullEdges <- function(points, orderEdges = TRUE){
   stopifnot(isBoolean(orderEdges))
   if(!is.matrix(points) || !is.numeric(points)){
