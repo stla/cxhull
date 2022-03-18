@@ -10,7 +10,7 @@ int cmpsites(const void* a, const void* b) {
 }
 
 // all edges from all vertices -------------------------------------------------
-unsigned** getEdges(SiteT* vertices, unsigned nvertices, unsigned outlength) {
+unsigned** getEdges1(SiteT* vertices, unsigned nvertices, unsigned outlength) {
   unsigned** out = malloc(outlength * sizeof(unsigned*));
   SiteT v0 = vertices[0];
   unsigned id0 = v0.id;
@@ -20,17 +20,13 @@ unsigned** getEdges(SiteT* vertices, unsigned nvertices, unsigned outlength) {
     out[i] = malloc(2 * sizeof(unsigned));
     out[i][0] = id0;
     out[i][1] = neighs_v0[i];
-    // qsortu(out[i], 2);
   }
   for(unsigned k = 1; k < nvertices; k++) {
     SiteT vk = vertices[k];
-    unsigned idk = vk.id;
+    unsigned ids0 = vk.id;
     unsigned* neighs_vk = vk.neighvertices;
     unsigned nk = vk.nneighvertices;
-    // unsigned ids[2];
-    unsigned ids0 = idk;
     for(unsigned i = 0; i < nk; i++) {
-      // qsortu(ids, 2);
       unsigned ids1 = neighs_vk[i];
       if(ids1 > ids0) {
         unsigned j;
@@ -57,10 +53,148 @@ unsigned** getEdges(SiteT* vertices, unsigned nvertices, unsigned outlength) {
   return out;
 }
 
+unsigned** getEdges2(SiteT* vertices, unsigned nvertices, unsigned outlength) {
+  unsigned** out = malloc(outlength * sizeof(unsigned*));
+  SiteT v0 = vertices[0];
+  unsigned id0 = v0.id;
+  unsigned* neighs_v0 = v0.neighvertices;
+  unsigned n0 = v0.nneighvertices;
+  for(unsigned i = 0; i < n0; i++) {
+    out[i] = malloc(2 * sizeof(unsigned));
+    out[i][0] = id0;
+    out[i][1] = neighs_v0[i];
+  }
+  for(unsigned k = 1; k < nvertices; k++) {
+    SiteT vk = vertices[k];
+    unsigned idk = vk.id;
+    unsigned* neighs_vk = vk.neighvertices;
+    unsigned nk = vk.nneighvertices;
+    for(unsigned i = 0; i < nk; i++) {
+      unsigned j = n0 + i;
+      out[j] = malloc(2 * sizeof(unsigned));
+      out[j][0] = idk;
+      out[j][1] = neighs_vk[i];
+    }
+    n0 = n0 + nk;
+  }
+  return out;
+}
+
+unsigned makeSites1(qhT* qh, SiteT* vertices, double* points, unsigned dim) {
+  unsigned nalledgesdouble = 0;
+  {
+    vertexT* vertex;
+    unsigned i_vertex = 0;
+    FORALLvertices {
+      // vertex id and coordinates
+      unsigned vertex_id = qh_pointid(qh, vertex->point);
+      vertices[i_vertex].id = vertex_id;
+      vertices[i_vertex].point = getpoint(points, dim, vertex_id);
+      {
+        unsigned* neighs = malloc(0);
+        unsigned nneighs = 0;
+        facetT *neighbor, **neighborp;
+        FOREACHneighbor_(vertex) {
+          if(neighbor->simplicial) {
+            vertexT *v, **vp;
+            FOREACHsetelement_(vertexT, neighbor->vertices, v) {
+              unsigned v_id = qh_pointid(qh, v->point);
+              if(v_id != vertex_id) {
+                unsigned pushed;
+                appendu(v_id, &neighs, nneighs, &pushed);
+                if(pushed) {
+                  nneighs++;
+                }
+              }
+            }
+          } else {
+            qh_makeridges(qh, neighbor);
+            ridgeT *r, **rp;
+            FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r) {
+              vertexT *v, **vp;
+              FOREACHsetelement_(vertexT, r->vertices, v) {
+                unsigned v_id = qh_pointid(qh, v->point);
+                if(v_id != vertex_id) {
+                  unsigned pushed;
+                  appendu(v_id, &neighs, nneighs, &pushed);
+                  if(pushed) {
+                    nneighs++;
+                  }
+                }
+              }
+            }
+          }
+        }
+        vertices[i_vertex].neighvertices = neighs;
+        vertices[i_vertex].nneighvertices = nneighs;
+        i_vertex++;
+        nalledgesdouble += nneighs;
+      }
+    }
+  }
+  return nalledgesdouble / 2;
+}
+
+unsigned makeSites2(qhT* qh, SiteT* vertices, double* points, unsigned dim) {
+  unsigned nalledges = 0;
+  {
+    vertexT* vertex;
+    unsigned i_vertex = 0;
+    FORALLvertices {
+      // vertex id and coordinates
+      unsigned vertex_id = qh_pointid(qh, vertex->point);
+      vertices[i_vertex].id = vertex_id;
+      vertices[i_vertex].point = getpoint(points, dim, vertex_id);
+      {
+        unsigned* neighs = malloc(0);
+        unsigned nneighs = 0;
+        facetT *neighbor, **neighborp;
+        FOREACHneighbor_(vertex) {
+          if(neighbor->simplicial) {
+            vertexT *v, **vp;
+            FOREACHsetelement_(vertexT, neighbor->vertices, v) {
+              unsigned v_id = qh_pointid(qh, v->point);
+              if(v_id > vertex_id) {
+                unsigned pushed;
+                appendu(v_id, &neighs, nneighs, &pushed);
+                if(pushed) {
+                  nneighs++;
+                }
+              }
+            }
+          } else {
+            qh_makeridges(qh, neighbor);
+            ridgeT *r, **rp;
+            FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r) {
+              vertexT *v, **vp;
+              FOREACHsetelement_(vertexT, r->vertices, v) {
+                unsigned v_id = qh_pointid(qh, v->point);
+                if(v_id > vertex_id) {
+                  unsigned pushed;
+                  appendu(v_id, &neighs, nneighs, &pushed);
+                  if(pushed) {
+                    nneighs++;
+                  }
+                }
+              }
+            }
+          }
+        }
+        vertices[i_vertex].neighvertices = neighs;
+        vertices[i_vertex].nneighvertices = nneighs;
+        i_vertex++;
+        nalledges += nneighs;
+      }
+    }
+  }
+  return nalledges;
+}
+
 // main function ---------------------------------------------------------------
 SetOfSitesT cxhullEdges(double* points,
                         unsigned dim,
                         unsigned n,
+                        unsigned adjacencies,
                         unsigned order_edges,
                         unsigned* exitcode,
                         const char* errfilename) {
@@ -80,73 +214,83 @@ SetOfSitesT cxhullEdges(double* points,
 
   if(!exitcode[0]) {  // 0 if no error from qhull
 
-    unsigned nalledgesdouble = 0;
-    // all vertices
+    qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
     unsigned nvertices = qh->num_vertices;
     SiteT* vertices = malloc(nvertices * sizeof(SiteT));
-    {
-      qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
-      vertexT* vertex;
-      unsigned i_vertex = 0;
-      FORALLvertices {
-        // vertex id and coordinates
-        unsigned vertex_id = qh_pointid(qh, vertex->point);
-        vertices[i_vertex].id = vertex_id;
-        vertices[i_vertex].point = getpoint(points, dim, vertex_id);
-        // vertices[i_vertex].nneighsvertices = 0;
-
-        {
-          unsigned* neighs = malloc(0);
-          unsigned nneighs = 0;
-          facetT *neighbor, **neighborp;
-          unsigned i_neighbor = 0;
-          FOREACHneighbor_(vertex) {
-            i_neighbor++;
-            if(neighbor->simplicial) {
-              // vertices[i_vertex].nneighsvertices += qh_setsize(qh,
-              // neighbor->vertices);
-              vertexT *v, **vp;
-              FOREACHsetelement_(vertexT, neighbor->vertices, v) {
-                unsigned v_id = qh_pointid(qh, v->point);
-                if(v_id != vertex_id) {
-                  unsigned pushed;
-                  appendu(v_id, &neighs, nneighs, &pushed);
-                  if(pushed) {
-                    nneighs++;
-                  }
-                }
-              }
-            } else {
-              qh_makeridges(qh, neighbor);
-              ridgeT *r, **rp;
-              FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r) {
-                vertexT *v, **vp;
-                FOREACHsetelement_(vertexT, r->vertices, v) {
-                  unsigned v_id = qh_pointid(qh, v->point);
-                  if(v_id != vertex_id) {
-                    unsigned pushed;
-                    appendu(v_id, &neighs, nneighs, &pushed);
-                    if(pushed) {
-                      nneighs++;
-                    }
-                  }
-                }
-              }
-            }
-          }
-          vertices[i_vertex].neighvertices = neighs;
-          vertices[i_vertex].nneighvertices = nneighs;
-          i_vertex++;
-          nalledgesdouble += nneighs;
-        }
-      }
+    unsigned nedges;
+    unsigned** edges;
+    if(adjacencies) {
+      nedges = makeSites1(qh, vertices, points, dim);
+      qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
+      edges = getEdges1(vertices, nvertices, nedges);
+    } else {
+      nedges = makeSites2(qh, vertices, points, dim);
+      qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
+      edges = getEdges2(vertices, nvertices, nedges);
     }
+    //{
+    // vertexT* vertex;
+    // unsigned i_vertex = 0;
+    // FORALLvertices {
+    //   // vertex id and coordinates
+    //   unsigned vertex_id = qh_pointid(qh, vertex->point);
+    //   vertices[i_vertex].id = vertex_id;
+    //   vertices[i_vertex].point = getpoint(points, dim, vertex_id);
+    //   // vertices[i_vertex].nneighsvertices = 0;
+    //
+    //   {
+    //     unsigned* neighs = malloc(0);
+    //     unsigned nneighs = 0;
+    //     facetT *neighbor, **neighborp;
+    //     FOREACHneighbor_(vertex) {
+    //       if(neighbor->simplicial) {
+    //         // vertices[i_vertex].nneighsvertices += qh_setsize(qh,
+    //         // neighbor->vertices);
+    //         vertexT *v, **vp;
+    //         FOREACHsetelement_(vertexT, neighbor->vertices, v) {
+    //           unsigned v_id = qh_pointid(qh, v->point);
+    //           if(v_id > vertex_id) {
+    //             unsigned pushed;
+    //             appendu(v_id, &neighs, nneighs, &pushed);
+    //             if(pushed) {
+    //               printf("simplicial pushed\n");
+    //               nneighs++;
+    //             }else{
+    //               printf("simplicial NOT pushed\n");
+    //             }
+    //           }
+    //         }
+    //       } else {
+    //         qh_makeridges(qh, neighbor);
+    //         ridgeT *r, **rp;
+    //         FOREACHsetelement_(ridgeT, qh_vertexridges(qh, vertex), r) {
+    //           vertexT *v, **vp;
+    //           FOREACHsetelement_(vertexT, r->vertices, v) {
+    //             unsigned v_id = qh_pointid(qh, v->point);
+    //             if(v_id > vertex_id) {
+    //               unsigned pushed;
+    //               appendu(v_id, &neighs, nneighs, &pushed);
+    //               if(pushed) {
+    //                 printf("pushed\n");
+    //                 nneighs++;
+    //               }else{
+    //                 printf("NOT pushed\n");
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     vertices[i_vertex].neighvertices = neighs;
+    //     vertices[i_vertex].nneighvertices = nneighs;
+    //     i_vertex++;
+    //     nalledgesdouble += nneighs;
+    //   }
+    // }
+    //}
 
-    qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
+    // edges
 
-    // all edges
-    unsigned nedges = nalledgesdouble / 2;
-    unsigned** edges = getEdges(vertices, nvertices, nedges);
     if(order_edges) {
       qsort(edges, nedges, sizeof(unsigned*), cmpedges);
     }
@@ -175,7 +319,7 @@ SetOfSitesT cxhullEdges(double* points,
 // -------------------------------------------------------------------------- //
 
 // SiteT to SEXP ---------------------------------------------------------
-SEXP SiteSXP(SiteT vertex, unsigned dim) {
+SEXP SiteSXP(SiteT vertex, unsigned dim, unsigned a) {
   unsigned nprotect = 0;
   SEXP R_vertex, names, id, point, neighvertices;
 
@@ -189,24 +333,29 @@ SEXP SiteSXP(SiteT vertex, unsigned dim) {
     REAL(point)[i] = vertex.point[i];
   }
 
-  unsigned nneighvertices = vertex.nneighvertices;
+  unsigned nneighvertices = a ? vertex.nneighvertices : 0;
   PROTECT(neighvertices = allocVector(INTSXP, nneighvertices));
   nprotect++;
   for(unsigned i = 0; i < nneighvertices; i++) {
     INTEGER(neighvertices)[i] = 1 + vertex.neighvertices[i];
   }
 
-  PROTECT(R_vertex = allocVector(VECSXP, 3));
+  size_t l = a ? 3 : 2;
+  PROTECT(R_vertex = allocVector(VECSXP, l));
   nprotect++;
   SET_VECTOR_ELT(R_vertex, 0, id);
   SET_VECTOR_ELT(R_vertex, 1, point);
-  SET_VECTOR_ELT(R_vertex, 2, neighvertices);
+  if(a) {
+    SET_VECTOR_ELT(R_vertex, 2, neighvertices);
+  }
 
-  PROTECT(names = allocVector(VECSXP, 3));
+  PROTECT(names = allocVector(VECSXP, l));
   nprotect++;
   SET_VECTOR_ELT(names, 0, mkChar("id"));
   SET_VECTOR_ELT(names, 1, mkChar("point"));
-  SET_VECTOR_ELT(names, 2, mkChar("neighvertices"));
+  if(a) {
+    SET_VECTOR_ELT(names, 2, mkChar("neighvertices"));
+  }
   setAttrib(R_vertex, R_NamesSymbol, names);
 
   UNPROTECT(nprotect);
@@ -214,7 +363,7 @@ SEXP SiteSXP(SiteT vertex, unsigned dim) {
 }
 
 // main function ---------------------------------------------------------------
-SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
+SEXP cxhullEdges_(SEXP p, SEXP a, SEXP o, SEXP errfile) {
   unsigned nprotect = 0;
 
   unsigned dim = ncols(p);
@@ -227,10 +376,12 @@ SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
           p)[i + n * j];  // could have been REAL(p) if p had been transposed
 
   unsigned orderEdges = INTEGER(o)[0];
+  unsigned adjacencies = INTEGER(a)[0];
 
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
-  SetOfSitesT vset = cxhullEdges(points, dim, n, orderEdges, &exitcode, e);
+  SetOfSitesT vset =
+      cxhullEdges(points, dim, n, adjacencies, orderEdges, &exitcode, e);
   if(exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }
@@ -247,7 +398,7 @@ SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
   nprotect += 2;
   for(unsigned i = 0; i < nvertices; i++) {
     SEXP vertex;
-    PROTECT(vertex = SiteSXP(vertices[i], dim));
+    PROTECT(vertex = SiteSXP(vertices[i], dim, adjacencies));
     nprotect++;
     SET_VECTOR_ELT(R_vertices, i, vertex);
     SET_STRING_ELT(vnames, i, Rf_asChar(VECTOR_ELT(vertex, 0)));

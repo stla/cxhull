@@ -58,6 +58,7 @@ cxhull <- function(points, triangulate = FALSE){
 #' @description Computes the vertices and the edges of the convex hull of a set 
 #'   of points.
 #' @param points numeric matrix, one point per row
+#' @param adjacencies Boolean, whether to return the vertex adjacencies
 #' @param orderEdges Boolean, whether to order the edges in the output
 #' @return A list with two fields: \code{vertices} and \code{edges}.
 #' @export
@@ -116,8 +117,8 @@ cxhull <- function(points, triangulate = FALSE){
 #'   lines(twopoints, lwd = 0.5, col = colors[pair])
 #' }
 #' par(opar)
-cxhullEdges <- function(points, orderEdges = TRUE){
-  stopifnot(isBoolean(orderEdges))
+cxhullEdges <- function(points, adjacencies = FALSE, orderEdges = FALSE){
+  stopifnot(isBoolean(adjacencies), isBoolean(orderEdges))
   if(!is.matrix(points) || !is.numeric(points)){
     stop("`points` must be a numeric matrix")
   }
@@ -134,7 +135,11 @@ cxhullEdges <- function(points, orderEdges = TRUE){
   storage.mode(points) <- "double"
   errfile <- tempfile(fileext = ".txt")
   hullEdges <- tryCatch({
-    .Call("cxhullEdges_", points, as.integer(orderEdges), errfile)
+    .Call(
+      "cxhullEdges_", points, 
+      as.integer(adjacencies), as.integer(orderEdges), 
+      errfile
+    )
   }, error = function(e){
     cat(readLines(errfile), sep = "\n")
     stop(e)

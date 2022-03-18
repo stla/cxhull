@@ -4,10 +4,12 @@
 \alias{cxhullEdges}
 \title{Vertices and edges of convex hull}
 \usage{
-cxhullEdges(points, orderEdges = TRUE)
+cxhullEdges(points, adjacencies = FALSE, orderEdges = FALSE)
 }
 \arguments{
 \item{points}{numeric matrix, one point per row}
+
+\item{adjacencies}{Boolean, whether to return the vertex adjacencies}
 
 \item{orderEdges}{Boolean, whether to order the edges in the output}
 }
