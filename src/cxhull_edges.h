@@ -2,6 +2,10 @@
 #ifndef CXHULLEDGESHEADER
 #define CXHULLEDGESHEADER
 
+#ifndef NULL
+  #define NULL ((void *)0)
+#endif
+
 typedef struct Site {
   unsigned  id;
   double*   point;
@@ -21,12 +25,12 @@ typedef struct SetOfSites {
   unsigned   nedges;
 } SetOfSitesT;
 
-typedef struct Ridge2 {
+typedef struct SimpleRidge {
   SimpleSiteT*  vertices;
   unsigned      ridgeOf1;
   unsigned      ridgeOf2;
   unsigned      nvertices;
-  unsigned      id;
-} Ridge2T;
+  unsigned      cantorid;
+} SimpleRidgeT;
 
 #endif

@@ -99,3 +99,14 @@ double squaredDistance(double* p1, double* p2, unsigned dim){
   }
   return out;
 }
+
+// test equality of two _sorted_ arrays ----------------------------------------
+unsigned equalarraysu(unsigned* array1, unsigned* array2, unsigned length) {
+  unsigned i;
+  for(i = 0; i < length; i++) {
+    if(array1[i] != array2[i]) {
+      break;
+    }
+  }
+  return i == length;
+}

@@ -14,16 +14,6 @@ int cmpfullvertices(const void* a, const void* b) {
   return ((*((FullVertexT*)a)).id - (*((FullVertexT*)b)).id);
 }
 
-// test equality of two _sorted_ arrays ----------------------------------------
-unsigned equalarraysu(unsigned* array1, unsigned* array2, unsigned length) {
-  unsigned i;
-  for(i = 0; i < length; i++) {
-    if(array1[i] != array2[i]) {
-      break;
-    }
-  }
-  return i == length;
-}
 
 // return ids of a vector of VertexT -------------------------------------------
 unsigned* map_vertexid(VertexT* vertices, unsigned nvertices) {

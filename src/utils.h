@@ -24,4 +24,6 @@ unsigned* uzeros(unsigned);
 
 double squaredDistance(double*, double*, unsigned);
 
+unsigned equalarraysu(unsigned*, unsigned*, unsigned);
+
 #endif
