@@ -122,17 +122,20 @@ cxhull <- function(points, triangulate = FALSE){
 cxhullEdges <- function(points, adjacencies = FALSE, orderEdges = FALSE){
   stopifnot(isBoolean(adjacencies), isBoolean(orderEdges))
   if(!is.matrix(points) || !is.numeric(points)){
-    stop("`points` must be a numeric matrix")
+    stop("The `points` argument must be a numeric matrix.")
   }
   dimension <- ncol(points)
   if(dimension < 2L){
-    stop("dimension must be at least 2")
+    stop("The dimension must be at least 2.")
+  }
+  if(dimension == 2L){
+    stop("This function is not implemented yet for the two-dimensional case.")
   }
   if(nrow(points) <= dimension){
-    stop("insufficient number of points")
+    stop("Insufficient number of points.")
   }
   if(any(is.na(points))){
-    stop("missing values are not allowed")
+    stop("Missing values are not allowed.")
   }
   if(anyDuplicated(points)){
     stop("There are some duplicated points.")
