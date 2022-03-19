@@ -22,11 +22,13 @@ Computes the vertices and the edges of the convex hull of a set
 }
 \examples{
 library(cxhull)
-VE <- cxhullEdges(hexacosichoron, orderEdges = FALSE)
+# let's try with the hexacosichoron (see `?hexacosichoron`)
+#   it is convex so its convex hull is itself
+VE <- cxhullEdges(hexacosichoron)
 edges <- VE[["edges"]]
-edge <- edges[sample.int(720L, 1L), ]
-A <- hexacosichoron[edge[1L], ]
-B <- hexacosichoron[edge[2L], ]
+random_edge <- edges[sample.int(720L, 1L), ]
+A <- hexacosichoron[random_edge[1L], ]
+B <- hexacosichoron[random_edge[2L], ]
 sqrt(c(crossprod(A - B))) # this is 2/phi
 # Now let's project the polytope to the H4 Coxeter plane 
 phi <- (1 + sqrt(5)) / 2

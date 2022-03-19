@@ -1,4 +1,4 @@
-# cxhull 0.4.0.9000
+# cxhull 0.4.0.9001
 
 * New function `cxhullEdges`, which computes only the vertices and the edges 
 of a convex hull.
