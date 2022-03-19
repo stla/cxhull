@@ -253,8 +253,8 @@ unsigned makeSites2(qhT* qh, SiteT* vertices, double* points, unsigned dim) {
   return nalledges;
 }
 
-unsigned cantorPairing(unsigned i, unsigned j){
-  return (i+j)*(i+j+1)/2 + j;
+unsigned cantorPairing(unsigned i, unsigned j) {
+  return (i + j) * (i + j + 1) / 2 + j;
 }
 
 // main function ---------------------------------------------------------------
@@ -284,7 +284,7 @@ SetOfSitesT cxhullEdges(double* points,
     unsigned nfaces = qh->num_facets;
     unsigned* nridges_per_facet = malloc(nfaces * sizeof(unsigned));
     unsigned nallsimplicialridges = 0;
-    
+
     {
       facetT* facet;
       unsigned i_facet = 0;
@@ -297,7 +297,7 @@ SetOfSitesT cxhullEdges(double* points,
         i_facet++;
       }
     }
-    
+
     {
       // all vertices
       // unsigned nvertices = qh->num_vertices;
@@ -309,46 +309,45 @@ SetOfSitesT cxhullEdges(double* points,
       }
       printf("nvertices: %d\n", i_vertex);
     }
-    unsigned ridgeSize = dim-1;
+    unsigned ridgeSize = dim - 1;
     unsigned** tablevids = malloc(nallsimplicialridges * sizeof(unsigned*));
     unsigned* duplicated = uzeros(nallsimplicialridges);
     {
       facetT* facet;
-      //unsigned i_facet = 0;
+      // unsigned i_facet = 0;
       unsigned i_ridge = 0;
       FORALLfacets {
         qh_makeridges(qh, facet);
-        //unsigned nridges = nridges_per_facet[i_facet];
+        // unsigned nridges = nridges_per_facet[i_facet];
         ridgeT *ridge, **ridgep;
         FOREACHridge_(facet->ridges) {
           unsigned verticesIDS[ridgeSize];
-          tablevids[i_ridge] = malloc(ridgeSize*sizeof(unsigned));
+          tablevids[i_ridge] = malloc(ridgeSize * sizeof(unsigned));
           for(unsigned v = 0; v < ridgeSize; v++) {
             tablevids[i_ridge][v] = ((vertexT*)ridge->vertices->e[v].p)->id;
           }
           qsortu(tablevids[i_ridge], ridgeSize);
-          printf("yo\n");
-//          tablevids[i_ridge] = verticesIDS;
+          //          tablevids[i_ridge] = verticesIDS;
           i_ridge++;
         }
-        //i_facet++;
+        // i_facet++;
       }
       printf("nridges: %d\n", i_ridge);
     }
     unsigned nallridges = nallsimplicialridges;
     printf("nallsimplicialridges: %d\n", nallridges);
-    
-    for(unsigned i = 0; i < nallsimplicialridges; i++){
-      printf("\ntablevids %d:\n", i);
-      for(unsigned j = 0; j < ridgeSize; j++){
-        printf("%d ", tablevids[i][j]);
-      }
-    }
-    
-    for(unsigned i = 0; i < nallsimplicialridges-1; i++){
-      for(unsigned j = i+1; j < nallsimplicialridges; j++){
+
+    // for(unsigned i = 0; i < nallsimplicialridges; i++){
+    //   printf("\ntablevids %d:\n", i);
+    //   for(unsigned j = 0; j < ridgeSize; j++){
+    //     printf("%d ", tablevids[i][j]);
+    //   }
+    // }
+
+    for(unsigned i = 0; i < nallsimplicialridges - 1; i++) {
+      for(unsigned j = i + 1; j < nallsimplicialridges; j++) {
         unsigned test = equalarraysu(tablevids[i], tablevids[j], ridgeSize);
-        if(test){
+        if(test) {
           duplicated[i] = 1;
           nallridges--;
           break;
@@ -356,8 +355,7 @@ SetOfSitesT cxhullEdges(double* points,
       }
     }
     printf("nallridges: %d\n", nallridges);
-    
-    
+
     unsigned* cantorIds = malloc(0);
     unsigned nCantorIds = 0;
     SimpleRidgeT* ridges = malloc(nallridges * sizeof(SimpleRidgeT));
@@ -365,57 +363,80 @@ SetOfSitesT cxhullEdges(double* points,
       facetT* facet;
       unsigned i_facet = 0;
       unsigned i_ridge = 0;
+      unsigned i_allridge = 0;
+      unsigned nridges = 0;
+      unsigned dups = 0;
       FORALLfacets {
         {  // face ridges
           qh_makeridges(qh, facet);
-          unsigned nridges = nridges_per_facet[i_facet];
+          nridges = nridges + nridges_per_facet[i_facet];
+          printf("\nnridges: %d", nridges);
           ridgeT *ridge, **ridgep;
+          unsigned i_ridge0 = i_ridge;
           FOREACHridge_(facet->ridges) {
-            if(duplicated[i_ridge]){
-              break;
+            i_ridge0 = i_ridge;
+            if(!duplicated[i_allridge]) {
+              // printf("\ni_ridge: %d", i_ridge);
+              // printf("\ni_allridge: %d", i_allridge);
+              unsigned ridgeSize = qh_setsize(qh, ridge->vertices);  // = dim-1
+              ridges[i_ridge].nvertices = ridgeSize;
+              // ridges[i_ridge].verticesIDS = malloc(ridgeSize *
+              // sizeof(unsigned));
+              ridges[i_ridge].vertices =
+                  malloc(ridgeSize * sizeof(SimpleSiteT));
+              // unsigned ids[ridgeSize];
+              for(unsigned v = 0; v < ridgeSize; v++) {
+                pointT* pt = ((vertexT*)ridge->vertices->e[v].p)->point;
+                unsigned ptid = qh_pointid(qh, pt);
+                // ridges[i_ridge].verticesIDS[v] = ptid;
+                ridges[i_ridge].vertices[v].id = ptid;
+                ridges[i_ridge].vertices[v].point = pt;
+                // ids[v] =
+                //     qh_pointid(qh,
+                //     ((vertexT*)ridge->vertices->e[v].p)->point);
+              }
+              // qsortu(ridges[i_ridge].verticesIDS, ridgeSize);
+              // qsortu(ids, ridgeSize);
+              // ridges[i_ridge].vertices = malloc(ridgeSize *
+              // sizeof(SimpleSiteT)); for(unsigned v = 0; v < ridgeSize; v++) {
+              //   ridges[i_ridge].vertices[v].id = ids[v];
+              //   ridges[i_ridge].vertices[v].point = getpoint(points, dim,
+              //   ids[v]);
+              // }
+              unsigned ridgeofs[2];
+              ridgeofs[0] = ridge->bottom->id;
+              ridgeofs[1] = ridge->top->id;
+              qsortu(ridgeofs, 2);
+              // printf("\nridgeofs0: %d\n", ridgeofs[0]);
+              // printf("ridgeofs1: %d\n", ridgeofs[1]);
+              ridges[i_ridge].ridgeOf1 = ridgeofs[0];
+              ridges[i_ridge].ridgeOf2 = ridgeofs[1];
+              unsigned cantorId = cantorPairing(ridgeofs[0], ridgeofs[1]);
+              ridges[i_ridge].cantorid = cantorId;
+              unsigned pushed;
+              appendu(cantorId, &cantorIds, nCantorIds, &pushed);
+              if(pushed) {
+                nCantorIds++;
+              }
+              i_ridge++;
             }
-            unsigned ridgeSize = qh_setsize(qh, ridge->vertices);  // = dim-1
-            ridges[i_ridge].nvertices = ridgeSize;
-            //ridges[i_ridge].verticesIDS = malloc(ridgeSize * sizeof(unsigned));
-            ridges[i_ridge].vertices = malloc(ridgeSize * sizeof(SimpleSiteT));
-            // unsigned ids[ridgeSize];
-            for(unsigned v = 0; v < ridgeSize; v++) {
-              pointT* pt = ((vertexT*)ridge->vertices->e[v].p)->point;
-              unsigned ptid = qh_pointid(qh, pt);
-              //ridges[i_ridge].verticesIDS[v] = ptid;
-              ridges[i_ridge].vertices[v].id = ptid;
-              ridges[i_ridge].vertices[v].point = pt;
-              // ids[v] =
-              //     qh_pointid(qh, ((vertexT*)ridge->vertices->e[v].p)->point);
-            }
-            // qsortu(ridges[i_ridge].verticesIDS, ridgeSize);
-            //qsortu(ids, ridgeSize);
-            // ridges[i_ridge].vertices = malloc(ridgeSize * sizeof(SimpleSiteT));
-            // for(unsigned v = 0; v < ridgeSize; v++) {
-            //   ridges[i_ridge].vertices[v].id = ids[v];
-            //   ridges[i_ridge].vertices[v].point = getpoint(points, dim, ids[v]);
-            // }
-            unsigned ridgeofs[2];
-            ridgeofs[0] = ridge->bottom->id;
-            ridgeofs[1] = ridge->top->id;
-            qsortu(ridgeofs, 2);
-            ridges[i_ridge].ridgeOf1 = ridgeofs[0];
-            ridges[i_ridge].ridgeOf2 = ridgeofs[1];
-            unsigned cantorId = cantorPairing(ridgeofs[0], ridgeofs[1]);
-            ridges[i_ridge].cantorid = cantorId;
-            unsigned pushed;
-            appendu(cantorId, &cantorIds, nCantorIds, &pushed);
-            if(pushed) {
-              nCantorIds++;
-            }
+            i_allridge++;
             ////
-            i_ridge++;
           }
+          // if(i_allridge == nridges-1){
+          //   i_ridge++;
+          // }
+          // if(i_ridge0 == i_ridge){
+          //   i_ridge++;
+          // }
         }
+        // i_allridge = nridges;
         ////
         i_facet++;
       }
     }
+
+    printf("\nnCantorIds: %d\n", nCantorIds);
 
     qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
     unsigned nvertices = qh->num_vertices;
