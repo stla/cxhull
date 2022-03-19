@@ -141,22 +141,20 @@ unsigned makeSites1(qhT* qh, SiteT* vertices, double* points, unsigned dim) {
 }
 
 // second smallest value of an array of numbers --------------------------------
-double secondSmallest(double* array, unsigned size){
+double secondSmallest(double* array, unsigned size) {
   double smallest, secondsmallest;
-  if (array[0] < array[1]) {
+  if(array[0] < array[1]) {
     smallest = array[0];
     secondsmallest = array[1];
-  }
-  else {
+  } else {
     smallest = array[1];
     secondsmallest = array[0];
   }
-  for (unsigned i = 2; i < size; i++) {
-    if (array[i] < smallest) {
+  for(unsigned i = 2; i < size; i++) {
+    if(array[i] < smallest) {
       secondsmallest = smallest;
       smallest = array[i];
-    }
-    else if (array[i] < secondsmallest) {
+    } else if(array[i] < secondsmallest) {
       secondsmallest = array[i];
     }
   }
@@ -164,12 +162,12 @@ double secondSmallest(double* array, unsigned size){
 }
 
 // the threshold distance to detect neighbor vertices --------------------------
-double ridgeThreshold(qhT* qh,
-                      SimpleRidgeT ridge,
+double ridgeThreshold(SimpleRidgeT ridge,
                       double* point,
+                      unsigned point_id,
                       unsigned dim) {
   unsigned nvertices = ridge.nvertices;
-  unsigned point_id = qh_pointid(qh, point);
+  // unsigned point_id = qh_pointid(qh, point);
   double dists[nvertices - 1];
   unsigned count = 0;
   for(unsigned i = 0; i < nvertices; i++) {
@@ -181,7 +179,7 @@ double ridgeThreshold(qhT* qh,
     }
   }
   // qsort(dists, count - 1, sizeof(double), cmpfuncdbl);
-  return secondSmallest(dists, count-1);
+  return secondSmallest(dists, count - 1);
 }
 
 // neighbor vertices of a vertex for dim>2 --------------------
@@ -208,7 +206,7 @@ unsigned* neighVertices2(qhT* qh,
              (dim == 3 ||
               squaredDistance(sridge.vertices[w].point,
                               sridge.vertices[v].point, dim) <=
-                  ridgeThreshold(qh, sridge, vertex_point, dim))) {
+                  ridgeThreshold(sridge, vertex_point, vertex_id, dim))) {
             unsigned pushed;
             appendu(wid, &neighs, *lengthout, &pushed);
             if(pushed) {
@@ -279,8 +277,8 @@ unsigned makeSites2(qhT* qh,
 
       //   }
       // }
-      vertices[i_vertex].neighvertices =
-          neighVertices2(qh, allridges, nallridges, vertex_id, vertex_point, dim, &nneighs);
+      vertices[i_vertex].neighvertices = neighVertices2(
+          qh, allridges, nallridges, vertex_id, vertex_point, dim, &nneighs);
       vertices[i_vertex].nneighvertices = nneighs;
       i_vertex++;
       nalledges += nneighs;
@@ -365,7 +363,7 @@ SimpleRidgeT* mergeSRidges(SimpleRidgeT* ridges,
 SetOfSitesT cxhullEdges(double* points,
                         unsigned dim,
                         unsigned n,
-                        unsigned adjacencies,
+                        // unsigned adjacencies,
                         unsigned order_edges,
                         unsigned* exitcode,
                         const char* errfilename) {
@@ -458,7 +456,7 @@ SetOfSitesT cxhullEdges(double* points,
           break;
         }
       }
-      if(nallridges == nridges_target){
+      if(nallridges == nridges_target) {
         break;
       }
     }
@@ -485,7 +483,8 @@ SetOfSitesT cxhullEdges(double* points,
             if(!duplicated[i_allridge]) {
               // printf("\ni_ridge: %d", i_ridge);
               // printf("\ni_allridge: %d", i_allridge);
-              //unsigned ridgeSize = qh_setsize(qh, ridge->vertices);  // = dim-1
+              // unsigned ridgeSize = qh_setsize(qh, ridge->vertices);  // =
+              // dim-1
               ridges[i_ridge].nvertices = ridgeSize;
               // ridges[i_ridge].verticesIDS = malloc(ridgeSize *
               // sizeof(unsigned));
@@ -549,22 +548,22 @@ SetOfSitesT cxhullEdges(double* points,
     SimpleRidgeT* newridges = mergeSRidges(ridges, nallridges, &nnewridges);
     printf("\nnnewridges: %d\n", nnewridges);
 
-    qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
+    // qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
     unsigned nvertices = qh->num_vertices;
-    SiteT* vertices = malloc(n * sizeof(SiteT));
-    unsigned nedges;
-    unsigned** edges;
-    if(adjacencies) {
-      nedges = makeSites1(qh, vertices, points, dim);
-      printf("nedges adj: %d\n", nedges);
-      qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
-      edges = getEdges1(vertices, nvertices, nedges);
-    } else {
-      nedges = makeSites2(qh, vertices, newridges, nnewridges, dim);
-      printf("nedges xxx: %d\n", nedges);
-      qsort(vertices, n, sizeof(SiteT), cmpsites);
-      edges = getEdges2(vertices, n, nedges);
-    }
+    SiteT* vertices = malloc(nvertices * sizeof(SiteT));
+    // unsigned nedges;
+    // unsigned** edges;
+    // if(adjacencies) {
+    //   nedges = makeSites1(qh, vertices, points, dim);
+    //   printf("nedges adj: %d\n", nedges);
+    //   qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
+    //   edges = getEdges1(vertices, nvertices, nedges);
+    // } else {
+    unsigned nedges = makeSites2(qh, vertices, newridges, nnewridges, dim);
+    printf("nedges xxx: %d\n", nedges);
+    qsort(vertices, nvertices, sizeof(SiteT), cmpsites);
+    unsigned** edges = getEdges2(vertices, nvertices, nedges);
+    // }
     //{
     // vertexT* vertex;
     // unsigned i_vertex = 0;
@@ -656,9 +655,9 @@ SetOfSitesT cxhullEdges(double* points,
 // -------------------------------------------------------------------------- //
 
 // SiteT to SEXP ---------------------------------------------------------
-SEXP SiteSXP(SiteT vertex, unsigned dim, unsigned a) {
+SEXP SiteSXP(SiteT vertex, unsigned dim){//, unsigned a) {
   unsigned nprotect = 0;
-  SEXP R_vertex, names, id, point, neighvertices;
+  SEXP R_vertex, names, id, point;//, neighvertices;
 
   PROTECT(id = allocVector(INTSXP, 1));
   nprotect++;
@@ -670,29 +669,29 @@ SEXP SiteSXP(SiteT vertex, unsigned dim, unsigned a) {
     REAL(point)[i] = vertex.point[i];
   }
 
-  unsigned nneighvertices = a ? vertex.nneighvertices : 0;
-  PROTECT(neighvertices = allocVector(INTSXP, nneighvertices));
-  nprotect++;
-  for(unsigned i = 0; i < nneighvertices; i++) {
-    INTEGER(neighvertices)[i] = 1 + vertex.neighvertices[i];
-  }
+  // unsigned nneighvertices = a ? vertex.nneighvertices : 0;
+  // PROTECT(neighvertices = allocVector(INTSXP, nneighvertices));
+  // nprotect++;
+  // for(unsigned i = 0; i < nneighvertices; i++) {
+  //   INTEGER(neighvertices)[i] = 1 + vertex.neighvertices[i];
+  // }
 
-  size_t l = a ? 3 : 2;
-  PROTECT(R_vertex = allocVector(VECSXP, l));
+  // size_t l = a ? 3 : 2;
+  PROTECT(R_vertex = allocVector(VECSXP, 2));
   nprotect++;
   SET_VECTOR_ELT(R_vertex, 0, id);
   SET_VECTOR_ELT(R_vertex, 1, point);
-  if(a) {
-    SET_VECTOR_ELT(R_vertex, 2, neighvertices);
-  }
+  // if(a) {
+  //   SET_VECTOR_ELT(R_vertex, 2, neighvertices);
+  // }
 
-  PROTECT(names = allocVector(VECSXP, l));
+  PROTECT(names = allocVector(VECSXP, 2));
   nprotect++;
   SET_VECTOR_ELT(names, 0, mkChar("id"));
   SET_VECTOR_ELT(names, 1, mkChar("point"));
-  if(a) {
-    SET_VECTOR_ELT(names, 2, mkChar("neighvertices"));
-  }
+  // if(a) {
+  //   SET_VECTOR_ELT(names, 2, mkChar("neighvertices"));
+  // }
   setAttrib(R_vertex, R_NamesSymbol, names);
 
   UNPROTECT(nprotect);
@@ -700,7 +699,7 @@ SEXP SiteSXP(SiteT vertex, unsigned dim, unsigned a) {
 }
 
 // main function ---------------------------------------------------------------
-SEXP cxhullEdges_(SEXP p, SEXP a, SEXP o, SEXP errfile) {
+SEXP cxhullEdges_(SEXP p, SEXP o, SEXP errfile) {
   unsigned nprotect = 0;
 
   unsigned dim = ncols(p);
@@ -713,12 +712,12 @@ SEXP cxhullEdges_(SEXP p, SEXP a, SEXP o, SEXP errfile) {
           p)[i + n * j];  // could have been REAL(p) if p had been transposed
 
   unsigned orderEdges = INTEGER(o)[0];
-  unsigned adjacencies = INTEGER(a)[0];
+  // unsigned adjacencies = INTEGER(a)[0];
 
   unsigned exitcode;
   const char* e = R_CHAR(Rf_asChar(errfile));
   SetOfSitesT vset =
-      cxhullEdges(points, dim, n, adjacencies, orderEdges, &exitcode, e);
+      cxhullEdges(points, dim, n, orderEdges, &exitcode, e);
   if(exitcode) {
     error("Received error code %d from qhull.", exitcode);
   }
@@ -735,7 +734,7 @@ SEXP cxhullEdges_(SEXP p, SEXP a, SEXP o, SEXP errfile) {
   nprotect += 2;
   for(unsigned i = 0; i < nvertices; i++) {
     SEXP vertex;
-    PROTECT(vertex = SiteSXP(vertices[i], dim, adjacencies));
+    PROTECT(vertex = SiteSXP(vertices[i], dim));//, adjacencies));
     nprotect++;
     SET_VECTOR_ELT(R_vertices, i, vertex);
     SET_STRING_ELT(vnames, i, Rf_asChar(VECTOR_ELT(vertex, 0)));

@@ -137,13 +137,23 @@ cxhullEdges <- function(points, adjacencies = FALSE, orderEdges = FALSE){
   hullEdges <- tryCatch({
     .Call(
       "cxhullEdges_", points, 
-      as.integer(adjacencies), as.integer(orderEdges), 
+      as.integer(orderEdges), 
       errfile, PACKAGE = "cxhull"
     )
   }, error = function(e){
     cat(readLines(errfile), sep = "\n")
     stop(e)
   })
+  if(adjacencies){
+    edges <- hullEdges[["edges"]]
+    vertices <- hullEdges[["vertices"]]
+    for(i in 1L:length(vertices)){
+      id <- vertices[[i]][["id"]]
+      vertices[[i]][["neighbors"]] <- 
+        sort(c(edges[edges[, 1L] == id, 2L], edges[edges[, 2L] == id, 1L]))
+    }
+    hullEdges[["vertices"]] <- vertices
+  }
   if(dimension == 3L){
     attr(hullEdges, "3d") <- TRUE
   }
