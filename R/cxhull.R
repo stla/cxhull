@@ -138,7 +138,7 @@ cxhullEdges <- function(points, adjacencies = FALSE, orderEdges = FALSE){
     .Call(
       "cxhullEdges_", points, 
       as.integer(adjacencies), as.integer(orderEdges), 
-      errfile
+      errfile, PACKAGE = "cxhull"
     )
   }, error = function(e){
     cat(readLines(errfile), sep = "\n")
