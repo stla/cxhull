@@ -257,6 +257,73 @@ unsigned cantorPairing(unsigned i, unsigned j) {
   return (i + j) * (i + j + 1) / 2 + j;
 }
 
+// append to a vector of SimpleSiteT -------------------------------------------
+void appendSS(SimpleSiteT x, SimpleSiteT** array, unsigned l, unsigned* flag) {
+  *flag = 1;
+  for(unsigned i = 0; i < l; i++) {
+    if(x.id == (*(*array + i)).id) {
+      *flag = 0;
+      break;
+    }
+  }
+  if(*flag == 1) {
+    *array = realloc(*array, (l + 1) * sizeof(SimpleSiteT));
+    if(*array == NULL) {
+      error("realloc failure - exiting\n");
+    }
+    *(*array + l) = x;
+  }
+}
+
+// union of two vectors of SimpleSiteT -----------------------------------------
+void unionSS(SimpleSiteT** vs1,
+             SimpleSiteT* vs2,
+             unsigned l1,
+             unsigned l2,
+             unsigned* l) {
+  *l = l1;
+  for(unsigned v = 0; v < l2; v++) {
+    unsigned pushed;
+    appendSS(vs2[v], vs1, *l, &pushed);
+    if(pushed) {
+      (*l)++;
+    }
+  }
+  // sort vertices according to their ids
+  // qsort(*vs1, *l, sizeof(VertexT), cmpvertices);
+}
+
+// merge ridges with same ridgeOf's --------------------------------------------
+SimpleRidgeT* mergeSRidges(SimpleRidgeT* ridges,
+                           unsigned nridges,
+                           unsigned* newlength) {
+  // http://www.c4learn.com/c-programs/to-delete-duplicate-elements-in-array.html
+  *newlength = nridges;
+  unsigned i, j, k;
+  for(i = 0; i < nridges - 1; i++) {
+    for(j = i + 1; j < nridges;) {
+      if(ridges[i].cantorid == ridges[j].cantorid) {
+        unsigned l;
+        unionSS(&(ridges[i].vertices), ridges[j].vertices, ridges[i].nvertices,
+                ridges[j].nvertices, &l);
+        ridges[i].nvertices = l;
+        (*newlength)--;
+        for(k = j; k + 1 < nridges; k++) {
+          ridges[k] = ridges[k + 1];
+        }
+        nridges--;
+      } else {
+        j++;
+      }
+    }
+  }
+  SimpleRidgeT* out = malloc(*newlength * sizeof(SimpleRidgeT));
+  for(unsigned r = 0; r < *newlength; r++) {
+    out[r] = ridges[r];
+  }
+  return out;
+}
+
 // main function ---------------------------------------------------------------
 SetOfSitesT cxhullEdges(double* points,
                         unsigned dim,
@@ -307,7 +374,7 @@ SetOfSitesT cxhullEdges(double* points,
         vertex->id = i_vertex;
         i_vertex++;
       }
-      printf("nvertices: %d\n", i_vertex);
+      // printf("nvertices: %d\n", i_vertex);
     }
     unsigned ridgeSize = dim - 1;
     unsigned** tablevids = malloc(nallsimplicialridges * sizeof(unsigned*));
@@ -438,6 +505,12 @@ SetOfSitesT cxhullEdges(double* points,
 
     printf("\nnCantorIds: %d\n", nCantorIds);
 
+    unsigned nnewridges;
+    SimpleRidgeT* newridges = mergeSRidges(ridges,
+                               nallridges,
+                               &nnewridges);
+    printf("\nnnewridges: %d\n", nnewridges);
+      
     qh_vertexneighbors(qh);  // make the neighbor facets of the vertices
     unsigned nvertices = qh->num_vertices;
     SiteT* vertices = malloc(n * sizeof(SiteT));
