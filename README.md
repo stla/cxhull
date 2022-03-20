@@ -1,6 +1,6 @@
 cxhull
 ================
-2022-01-31
+2022-03-20
 
 <!-- badges: start -->
 
@@ -356,6 +356,13 @@ hullSummary(thull)
 ## attr(,"facets")
 ## [1] "0 triangular facet, 6 other facets"
 ```
+
+## The `cxhullEdges` function
+
+The `cxhull` function returns a lot of information about the convex
+hull. If you only want to find the edges of the convex hull, use the
+`cxhullEdges` function instead, for a speed gain and less memory
+consumption.
 
 ## Plotting a 3-dimensional hull
 

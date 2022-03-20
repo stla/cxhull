@@ -1,7 +1,7 @@
 ---
 title: "cxhull"
 author: ""
-date: "2022-01-31"
+date: "2022-03-20"
 output:
   github_document:
   html_document:
@@ -176,6 +176,12 @@ Alternatively and better, you can apply the function `hullSummary` to the
 hullSummary(thull)
 ```
 
+
+## The `cxhullEdges` function
+
+The `cxhull` function returns a lot of information about the convex hull. If 
+you only want to find the edges of the convex hull, use the `cxhullEdges` 
+function instead, for a speed gain and less memory consumption. 
 
 
 ## Plotting a 3-dimensional hull
