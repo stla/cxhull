@@ -2,7 +2,7 @@
 #ifndef CXHULLEDGESHEADER
 #define CXHULLEDGESHEADER
 
-#ifndef NULL
+#ifndef NULL // just to get rid of the RStudio warnings
   #define NULL ((void *)0)
 #endif
 
@@ -18,12 +18,12 @@ typedef struct SimpleSite {
   double*   point;
 } SimpleSiteT;
 
-typedef struct SetOfSites {
+typedef struct SimpleHull {
   SiteT*     sites;
   unsigned   nsites;
   unsigned** edges;
   unsigned   nedges;
-} SetOfSitesT;
+} SimpleHullT;
 
 typedef struct SimpleRidge {
   SimpleSiteT*  vertices;
