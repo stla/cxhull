@@ -1,7 +1,7 @@
-# cxhull 0.4.0.9001
+# cxhull 0.5.0
 
 * New function `cxhullEdges`, which computes only the vertices and the edges 
-of a convex hull.
+of a convex hull (for speed gain and less memory consumption).
 
 
 # cxhull 0.4.0
