@@ -362,7 +362,10 @@ hullSummary(thull)
 The `cxhull` function returns a lot of information about the convex
 hull. If you only want to find the edges of the convex hull, use the
 `cxhullEdges` function instead, for a speed gain and less memory
-consumption.
+consumption. For example, the `cxhull` function fails on my laptop for
+the [E8 root
+polytope](https://laustep.github.io/stlahblog/posts/E8rootPolytope.html),
+while the `cxhullEdges` function works (but it takes a while).
 
 ## Plotting a 3-dimensional hull
 

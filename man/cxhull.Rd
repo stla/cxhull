@@ -12,7 +12,8 @@ cxhull(points, triangulate = FALSE)
 \item{triangulate}{logical, whether to triangulate the convex hull}
 }
 \value{
-A list.
+A list providing a lot of information about the convex hull. See 
+  the \strong{README} file for details.
 }
 \description{
 Computes the convex hull of a set of points.

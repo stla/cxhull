@@ -7,14 +7,20 @@
 cxhullEdges(points, adjacencies = FALSE, orderEdges = FALSE)
 }
 \arguments{
-\item{points}{numeric matrix, one point per row}
+\item{points}{numeric matrix, one point per row; it must contain at least 
+three columns (the two-dimensional case is not implemented yet)}
 
 \item{adjacencies}{Boolean, whether to return the vertex adjacencies}
 
 \item{orderEdges}{Boolean, whether to order the edges in the output}
 }
 \value{
-A list with two fields: \code{vertices} and \code{edges}.
+A list with two fields: \code{vertices} and \code{edges}. The 
+  \code{vertices} field is a list which provides an id for each vertex and 
+  its coordinates. If \code{adjacencies=TRUE}, it provides in addition the 
+  ids of the adjacent vertices for each vertex. The \code{edges} fields is 
+  an integer matrix with two columns. Each row provides the two ids of the 
+  vertices of the corresponding edge.
 }
 \description{
 Computes the vertices and the edges of the convex hull of a set 

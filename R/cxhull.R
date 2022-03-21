@@ -2,7 +2,8 @@
 #' @description Computes the convex hull of a set of points.
 #' @param points numeric matrix, one point per row
 #' @param triangulate logical, whether to triangulate the convex hull
-#' @return A list.
+#' @return A list providing a lot of information about the convex hull. See 
+#'   the \strong{README} file for details.
 #' @export
 #' @useDynLib cxhull, .registration = TRUE
 #' @examples
@@ -60,10 +61,16 @@ cxhull <- function(points, triangulate = FALSE){
 #' @title Vertices and edges of convex hull
 #' @description Computes the vertices and the edges of the convex hull of a set 
 #'   of points.
-#' @param points numeric matrix, one point per row
+#' @param points numeric matrix, one point per row; it must contain at least 
+#'   three columns (the two-dimensional case is not implemented yet)
 #' @param adjacencies Boolean, whether to return the vertex adjacencies
 #' @param orderEdges Boolean, whether to order the edges in the output
-#' @return A list with two fields: \code{vertices} and \code{edges}.
+#' @return A list with two fields: \code{vertices} and \code{edges}. The 
+#'   \code{vertices} field is a list which provides an id for each vertex and 
+#'   its coordinates. If \code{adjacencies=TRUE}, it provides in addition the 
+#'   ids of the adjacent vertices for each vertex. The \code{edges} fields is 
+#'   an integer matrix with two columns. Each row provides the two ids of the 
+#'   vertices of the corresponding edge.
 #' @export
 #' @useDynLib cxhull, .registration = TRUE
 #' @examples library(cxhull)
