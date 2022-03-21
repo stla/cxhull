@@ -5,5 +5,5 @@
 #'   \code{2/phi}, where \code{phi} is the golden number. It has 720 edges.
 #'
 #' @format A matrix with 120 rows and 4 columns.
-#' @source \url{http://eusebeia.dyndns.org/4d/600-cell/}
+#' @source \url{http://eusebeia.dyndns.org/4d/600-cell}
 "hexacosichoron"

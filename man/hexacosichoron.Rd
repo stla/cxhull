@@ -8,7 +8,7 @@
 A matrix with 120 rows and 4 columns.
 }
 \source{
-\url{http://eusebeia.dyndns.org/4d/600-cell/}
+\url{http://eusebeia.dyndns.org/4d/600-cell}
 }
 \usage{
 hexacosichoron
