@@ -349,8 +349,8 @@ refineMesh <- function(mesh){
 #'
 #' @examples library(cxhull)
 #' library(rgl)
-#' dodecahedron <- t(dodecahedron3d()$vb[-4L, ])
-#' hull <- cxhull(dodecahedron, triangulate = TRUE)
+#' cuboctahedron <- t(cuboctahedron3d()$vb[-4L, ])
+#' hull <- cxhull(cuboctahedron, triangulate = TRUE)
 #' # single color ####
 #' open3d(windowRect = c(50, 50, 562, 562))
 #' plotConvexHull3d(hull)
