@@ -1,4 +1,11 @@
-## CRAN checks
+## Resubmission
+
+My previous submission has been archived, because of an example which takes 
+more than 5 seconds. This example produces two **rgl** plots. I replaced the 
+plotted polyhedron with a smaller one, so the example is faster now.
+
+
+## CRAN checks of previous version
 
 The CRAN checks results find an error with the old release of R. That's 
 because of an example which calls `grDevices::hcl.colors` with the palette 
