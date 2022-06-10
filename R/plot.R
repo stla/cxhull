@@ -7,8 +7,8 @@ refineMesh <- function(mesh){
   )
 }
 
-#' @title Plot triangulated 3D convex hull
-#' @description Plot a triangulated 3D convex hull with \strong{rgl}.
+#' @title Plot triangulated 3d convex hull
+#' @description Plot a triangulated 3d convex hull with \strong{rgl}.
 #'
 #' @param hull an output of \code{\link{cxhull}} applied to 3D points and 
 #'   with the option \code{triangulate=TRUE}
@@ -44,7 +44,8 @@ refineMesh <- function(mesh){
 #' @importFrom Morpho mergeMeshes
 #' @importFrom grDevices colorRamp rgb
 #'
-#' @examples library(cxhull)
+#' @examples 
+#' library(cxhull)
 #' library(rgl)
 #' cuboctahedron <- t(cuboctahedron3d()$vb[-4L, ])
 #' hull <- cxhull(cuboctahedron, triangulate = TRUE)
