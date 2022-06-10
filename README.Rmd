@@ -12,7 +12,7 @@ editor_options:
 ---
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/stla/cxhull/workflows/R-CMD-check/badge.svg)](https://github.com/stla/cxhull/actions)
+[![R-CMD-check](https://github.com/stla/cxhull/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stla/cxhull/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ```{r setup, include=FALSE}

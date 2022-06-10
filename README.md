@@ -3,8 +3,7 @@ cxhull
 2022-03-20
 
 <!-- badges: start -->
-
-[![R-CMD-check](https://github.com/stla/cxhull/workflows/R-CMD-check/badge.svg)](https://github.com/stla/cxhull/actions)
+[![R-CMD-check](https://github.com/stla/cxhull/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stla/cxhull/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The purpose of the `cxhull` package is to compute the convex hull of a
