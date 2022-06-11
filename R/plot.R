@@ -78,6 +78,7 @@ refineMesh <- function(mesh){
 #' plotConvexHull3d(
 #'   hull, angleThreshold = 179,
 #'   tubesRadius = 0.07, spheresRadius = 0.1
+#' )
 #' }
 plotConvexHull3d <- function(
     hull, angleThreshold = NULL,
