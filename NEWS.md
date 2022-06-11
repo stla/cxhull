@@ -1,3 +1,13 @@
+# cxhull 0.6.0
+
+* New function `dihedralAngles` which computes the dihedral angles of a 3d 
+convex hull.
+
+* New argument `angleThreshold` in the `plotConvexHull3d` function. Edges whose
+corresponding dihedral angle is greater than `angleThreshold` are removed from 
+the plot. 
+
+
 # cxhull 0.5.0
 
 * New function `cxhullEdges`, which computes only the vertices and the edges 
