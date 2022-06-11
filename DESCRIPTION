@@ -23,7 +23,8 @@ Imports:
     grDevices,
     Morpho,
     rgl,
-    Rvcg
+    Rvcg,
+    utils
 Suggests: 
     colorspace
 Encoding: UTF-8
