@@ -10,8 +10,12 @@ refineMesh <- function(mesh){
 #' @title Plot triangulated 3d convex hull
 #' @description Plot a triangulated 3d convex hull with \strong{rgl}.
 #'
-#' @param hull an output of \code{\link{cxhull}} applied to 3D points and 
+#' @param hull an output of \code{\link{cxhull}} applied to 3d points and 
 #'   with the option \code{triangulate=TRUE}
+#' @param angleThreshold a threshold angle in degrees, typically \code{179}, 
+#'   to get rid of edges between coplanar faces: edges whose corresponding 
+#'   dihedral angle is greater than this threshold are removed; \code{NULL} 
+#'   to use another method (see the Leonardo example)
 #' @param edgesAsTubes Boolean, whether to draw the edges as tubes
 #' @param verticesAsSpheres Boolean, whether to draw the vertices as spheres
 #' @param palette a vector of colors to make a color gradient for the faces; 
@@ -60,14 +64,36 @@ refineMesh <- function(mesh){
 #'   palette <- "Rocket"
 #' }
 #' plotConvexHull3d(hull, palette = hcl.colors(256, palette), bias = 0.5)
+#' 
+#' \donttest{
+#' library(cxhull)
+#' library(rgl)
+#' # Leonardo da Vinci's 72-sided sphere ####
+#' hull <- cxhull(daVinciSphere, triangulate = TRUE)
+#' # there are some undesirable edges:
+#' plotConvexHull3d(
+#'   hull, tubesRadius = 0.07, spheresRadius = 0.1
+#' )
+#' # => use `angleThreshold` to get rid of these edges:
+#' plotConvexHull3d(
+#'   hull, angleThreshold = 179,
+#'   tubesRadius = 0.07, spheresRadius = 0.1
+#' }
 plotConvexHull3d <- function(
-    hull, edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
+    hull, angleThreshold = NULL,
+    edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
     palette = NULL, bias = 1, interpolate = "linear", g = identity, 
     facesColor = "navy", edgesColor = "gold", 
     tubesRadius = 0.03, spheresRadius = 0.05, spheresColor = edgesColor
 ){
-  edges <- EdgesAB(hull)
-  trueEdges <- edges[edges[, 3L] == "yes", c(1L, 2L)]
+  if(is.null(angleThreshold)){
+    edges <- EdgesAB(hull)
+    trueEdges <- edges[edges[, 3L] == "yes", c(1L, 2L)]
+  }else{
+    edges <- dihedralAngles(hull)
+    trueEdges <- 
+      as.matrix(subset(edges, angle < angleThreshold)[, c("i1", "i2")])
+  }
   if(is.null(palette)){
     ncolors <- length(facesColor) 
     if(ncolors == 1L){

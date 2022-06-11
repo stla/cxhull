@@ -54,7 +54,7 @@ dihedralAngles <- function(hull){
     nrml2 <- Facets[[f2]][["normal"]]
     angles[i] <- acos(min(1, max(-1, c(crossprod(nrml1, nrml2)))))
   }
-  edges[["angle"]] <- angles * 180/pi
+  edges[["angle"]] <- 180 - angles * 180/pi
   edges
 }
 

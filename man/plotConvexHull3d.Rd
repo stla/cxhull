@@ -6,6 +6,7 @@
 \usage{
 plotConvexHull3d(
   hull,
+  angleThreshold = NULL,
   edgesAsTubes = TRUE,
   verticesAsSpheres = TRUE,
   palette = NULL,
@@ -20,8 +21,13 @@ plotConvexHull3d(
 )
 }
 \arguments{
-\item{hull}{an output of \code{\link{cxhull}} applied to 3D points and 
+\item{hull}{an output of \code{\link{cxhull}} applied to 3d points and 
 with the option \code{triangulate=TRUE}}
+
+\item{angleThreshold}{a threshold angle in degrees, typically \code{179}, 
+to get rid of edges between coplanar faces: edges whose corresponding 
+dihedral angle is greater than this threshold are removed; \code{NULL} 
+to use another method (see the Leonardo example)}
 
 \item{edgesAsTubes}{Boolean, whether to draw the edges as tubes}
 
@@ -79,4 +85,19 @@ if(getRversion() < "4.1.0"){
   palette <- "Rocket"
 }
 plotConvexHull3d(hull, palette = hcl.colors(256, palette), bias = 0.5)
+
+\donttest{
+library(cxhull)
+library(rgl)
+# Leonardo da Vinci's 72-sided sphere ####
+hull <- cxhull(daVinciSphere, triangulate = TRUE)
+# there are some undesirable edges:
+plotConvexHull3d(
+  hull, tubesRadius = 0.07, spheresRadius = 0.1
+)
+# => use `angleThreshold` to get rid of these edges:
+plotConvexHull3d(
+  hull, angleThreshold = 179,
+  tubesRadius = 0.07, spheresRadius = 0.1
+}
 }
