@@ -25,5 +25,6 @@ Unless all faces are triangular, the output does not define a mesh
 }
 \examples{
 library(cxhull)
-septuaginta <- hullMesh(daVinciSphere)
+hull <- cxhull(daVinciSphere)
+septuaginta <- hullMesh(hull)
 }

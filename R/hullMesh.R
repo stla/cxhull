@@ -36,7 +36,8 @@ orderFace <- function(face) {
 #'
 #' @examples
 #' library(cxhull)
-#' septuaginta <- hullMesh(daVinciSphere)
+#' hull <- cxhull(daVinciSphere)
+#' septuaginta <- hullMesh(hull)
 hullMesh <- function(hull, simplify = TRUE) {
   stopifnot(isBoolean(simplify))
   vertices <- VerticesXYZ(hull)
