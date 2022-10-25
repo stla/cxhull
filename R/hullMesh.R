@@ -30,6 +30,8 @@ orderFace <- function(face) {
 #' @return A list giving the vertices and the faces.
 #' @export
 #' 
+#' @importFrom data.table uniqueN
+#' 
 #' @note Unless all faces are triangular, the output does not define a mesh 
 #'   with coherently oriented faces. If you want correct face orientations, 
 #'   you can use the \strong{PolygonSoup} package. 
