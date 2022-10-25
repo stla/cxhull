@@ -41,7 +41,7 @@ orderFace <- function(face) {
 hullMesh <- function(hull, simplify = TRUE) {
   stopifnot(isBoolean(simplify))
   vertices <- VerticesXYZ(hull)
-  faces <- lapply(chull[["facets"]], orderFace)
+  faces <- lapply(hull[["facets"]], orderFace)
   if(simplify) {
     nsides <- uniqueN(lengths(faces))
     if(nsides == 1L) {
