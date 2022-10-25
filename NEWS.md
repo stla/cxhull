@@ -1,3 +1,12 @@
+# cxhull 0.7.0
+
+* New function `hullMesh` to extract the vertices and the faces of a 3d convex 
+hull.
+
+* Updated the vertices of Leonardo da Vinci's 72-sided sphere; the new ones 
+are more accurate.
+
+
 # cxhull 0.6.0
 
 * New function `dihedralAngles` which computes the dihedral angles of a 3d 

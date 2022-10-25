@@ -1,8 +1,8 @@
 Type: Package
 Package: cxhull
 Title: Convex Hull
-Version: 0.6.0
-Date: 2022-06-11
+Version: 0.7.0
+Date: 2022-10-25
 Authors@R: c(
     person("C. B.", "Barber", role = "cph",
            comment = "author of the Qhull library"),
@@ -20,6 +20,7 @@ BugReports: https://github.com/stla/cxhull/issues
 Depends: 
     R (>= 2.10)
 Imports: 
+    data.table,
     grDevices,
     Morpho,
     rgl,
