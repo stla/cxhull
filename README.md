@@ -1,8 +1,9 @@
 cxhull
 ================
-2022-03-20
+2022-10-25
 
 <!-- badges: start -->
+
 [![R-CMD-check](https://github.com/stla/cxhull/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stla/cxhull/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -241,120 +242,8 @@ polygonize(face_edges)
 ## [1] 2 4 8 6
 ```
 
-Alternatively and better, you can apply the function `hullSummary` to
-the *triangulated* convex hull:
-
-``` r
-hullSummary(thull)
-## $vertices
-##   [,1] [,2] [,3]
-## 2    0    0    0
-## 3    0    0    1
-## 4    0    1    0
-## 5    0    1    1
-## 6    1    0    0
-## 7    1    0    1
-## 8    1    1    0
-## 9    1    1    1
-## 
-## $triangles
-## list()
-## 
-## $otherfacets
-## $otherfacets[[1]]
-## $otherfacets[[1]]$family
-## [1] 0
-## 
-## $otherfacets[[1]]$facetids
-## [1] 1 2
-## 
-## $otherfacets[[1]]$edges
-##      [,1] [,2]
-## [1,] "2"  "4" 
-## [2,] "4"  "8" 
-## [3,] "8"  "6" 
-## [4,] "6"  "2" 
-## 
-## 
-## $otherfacets[[2]]
-## $otherfacets[[2]]$family
-## [1] 2
-## 
-## $otherfacets[[2]]$facetids
-## [1] 3 4
-## 
-## $otherfacets[[2]]$edges
-##      [,1] [,2]
-## [1,] "2"  "3" 
-## [2,] "3"  "7" 
-## [3,] "7"  "6" 
-## [4,] "6"  "2" 
-## 
-## 
-## $otherfacets[[3]]
-## $otherfacets[[3]]$family
-## [1] 4
-## 
-## $otherfacets[[3]]$facetids
-## [1] 5 6
-## 
-## $otherfacets[[3]]$edges
-##      [,1] [,2]
-## [1,] "6"  "7" 
-## [2,] "7"  "9" 
-## [3,] "9"  "8" 
-## [4,] "8"  "6" 
-## 
-## 
-## $otherfacets[[4]]
-## $otherfacets[[4]]$family
-## [1] 6
-## 
-## $otherfacets[[4]]$facetids
-## [1] 7 8
-## 
-## $otherfacets[[4]]$edges
-##      [,1] [,2]
-## [1,] "2"  "3" 
-## [2,] "3"  "5" 
-## [3,] "5"  "4" 
-## [4,] "4"  "2" 
-## 
-## 
-## $otherfacets[[5]]
-## $otherfacets[[5]]$family
-## [1] 8
-## 
-## $otherfacets[[5]]$facetids
-## [1]  9 10
-## 
-## $otherfacets[[5]]$edges
-##      [,1] [,2]
-## [1,] "4"  "5" 
-## [2,] "5"  "9" 
-## [3,] "9"  "8" 
-## [4,] "8"  "4" 
-## 
-## 
-## $otherfacets[[6]]
-## $otherfacets[[6]]$family
-## [1] 10
-## 
-## $otherfacets[[6]]$facetids
-## [1] 11 12
-## 
-## $otherfacets[[6]]$edges
-##      [,1] [,2]
-## [1,] "3"  "5" 
-## [2,] "5"  "9" 
-## [3,] "9"  "7" 
-## [4,] "7"  "3" 
-## 
-## 
-## 
-## attr(,"facets")
-## [1] "0 triangular facet, 6 other facets"
-```
+Instead of using this function, use the `hullMesh` function. It returns
+the vertices of the convex hull and its faces with ordered indices.
 
 ## The `cxhullEdges` function
 

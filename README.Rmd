@@ -1,7 +1,7 @@
 ---
 title: "cxhull"
 author: ""
-date: "2022-03-20"
+date: "2022-10-25"
 output:
   github_document:
   html_document:
@@ -169,12 +169,8 @@ polygonize <- function(edges){
 polygonize(face_edges)
 ```
 
-Alternatively and better, you can apply the function `hullSummary` to the 
-*triangulated* convex hull:
-
-```{r}
-hullSummary(thull)
-```
+Instead of using this function, use the `hullMesh` function. It returns the 
+vertices of the convex hull and its faces with ordered indices. 
 
 
 ## The `cxhullEdges` function
