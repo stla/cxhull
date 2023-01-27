@@ -362,7 +362,7 @@ ConvexHullT* convexHull(double* points,
                         unsigned* exitcode,
                         const char* errfilename) {
   char opts[250];  // option flags for qhull, see qh_opt.htm
-  sprintf(opts, "qhull s FF %s", triangulate ? "Qt" : "");
+  snprintf(opts, sizeof(opts), "qhull s FF %s", triangulate ? "Qt" : "");
   qhT qh_qh;  // Qhull's data structure
   qhT* qh = &qh_qh;
   QHULL_LIB_CHECK

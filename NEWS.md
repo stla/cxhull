@@ -1,3 +1,8 @@
+# cxhull 0.7.1
+
+Replaced `sprintf` with `snprintf` in the C code.
+
+
 # cxhull 0.7.0
 
 * New function `hullMesh` to extract the vertices and the faces of a 3d convex 
