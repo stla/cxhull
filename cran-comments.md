@@ -1,6 +1,6 @@
 ## Changes
 
-Replaced `sprintf` with `snprintf` in the C code.
+Fixed the `snprintf` calls in the C code.
 
 
 ## Test environments
