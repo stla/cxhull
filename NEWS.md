@@ -1,3 +1,8 @@
+# cxhull 0.7.2
+
+Fixed a small mistake in the C code.
+
+
 # cxhull 0.7.1
 
 Replaced `sprintf` with `snprintf` in the C code.
