@@ -1,11 +1,6 @@
-## Changes
-
-Fixed the `snprintf` calls in the C code.
-
-
 ## Test environments
 
-* Linux Mint, R-4.2.2
+* Linux Mint, R-4.3.0
 * win-builder (devel)
 * Ubuntu 20, via Github action
 

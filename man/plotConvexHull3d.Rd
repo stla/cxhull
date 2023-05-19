@@ -17,7 +17,8 @@ plotConvexHull3d(
   edgesColor = "gold",
   tubesRadius = 0.03,
   spheresRadius = 0.05,
-  spheresColor = edgesColor
+  spheresColor = edgesColor,
+  alpha = 1
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ to know the number of faces}
 
 \item{spheresColor}{the color of the spheres when 
 \code{verticesAsSpheres=TRUE}}
+
+\item{alpha}{number between 0 and 1 controlling the opacity of the faces}
 }
 \value{
 No value.

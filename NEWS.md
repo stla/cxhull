@@ -1,3 +1,9 @@
+# cxhull 0.7.3
+
+New argument `alpha` in the `plotConvexHull3d` function, to control the 
+transparency of the faces. 
+
+
 # cxhull 0.7.2
 
 Fixed a small mistake in the C code.

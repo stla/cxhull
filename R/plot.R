@@ -40,6 +40,7 @@ refineMesh <- function(mesh){
 #'   \code{verticesAsSpheres=TRUE}
 #' @param spheresColor the color of the spheres when 
 #'   \code{verticesAsSpheres=TRUE}
+#' @param alpha number between 0 and 1 controlling the opacity of the faces
 #'
 #' @return No value.
 #' @export
@@ -85,7 +86,8 @@ plotConvexHull3d <- function(
     edgesAsTubes = TRUE, verticesAsSpheres = TRUE, 
     palette = NULL, bias = 1, interpolate = "linear", g = identity, 
     facesColor = "navy", edgesColor = "gold", 
-    tubesRadius = 0.03, spheresRadius = 0.05, spheresColor = edgesColor
+    tubesRadius = 0.03, spheresRadius = 0.05, spheresColor = edgesColor,
+    alpha = 1
 ){
   if(is.null(angleThreshold)){
     edges <- EdgesAB(hull)
@@ -98,7 +100,7 @@ plotConvexHull3d <- function(
   if(is.null(palette)){
     ncolors <- length(facesColor) 
     if(ncolors == 1L){
-      triangles3d(TrianglesXYZ(hull), color = facesColor)
+      triangles3d(TrianglesXYZ(hull), color = facesColor, alpha = alpha)
     }else{
       nTriangles <- length(hull[["facets"]])
       trianglesxyz <- TrianglesXYZ(hull)
@@ -106,7 +108,8 @@ plotConvexHull3d <- function(
       if(ncolors == nTriangles){
         for(i in 1L:nTriangles){
           triangles3d(
-            matrix(triangles[[i]], nrow = 3L, ncol = 3L), color = facesColor[i]
+            matrix(triangles[[i]], nrow = 3L, ncol = 3L), 
+            color = facesColor[i], alpha = alpha
           )
         }
       }else{
@@ -120,7 +123,7 @@ plotConvexHull3d <- function(
             family <- families[i]
             triangles3d(
               matrix(triangles[[i]], nrow = 3L, ncol = 3L), 
-              color = facesColor[family]
+              color = facesColor[family], alpha = alpha
             )
           }
         }else{
@@ -159,7 +162,7 @@ plotConvexHull3d <- function(
       RGB <- fpalette(g(dists))
       colors <- rgb(RGB[, 1L], RGB[, 2L], RGB[, 3L], maxColorValue = 255)
       mesh[["material"]][["color"]] <- colors
-      shade3d(mesh)
+      shade3d(mesh, alpha = alpha)
     }
   }
   Vertices <- VerticesXYZ(hull)

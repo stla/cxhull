@@ -1,8 +1,8 @@
 Type: Package
 Package: cxhull
 Title: Convex Hull
-Version: 0.7.2
-Date: 2023-03-08
+Version: 0.7.3
+Date: 2023-05-19
 Authors@R: c(
     person("C. B.", "Barber", role = "cph",
            comment = "author of the Qhull library"),
@@ -29,4 +29,4 @@ Suggests:
     colorspace
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
