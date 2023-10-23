@@ -46,7 +46,6 @@ refineMesh <- function(mesh){
 #' @export
 #'
 #' @importFrom rgl triangles3d cylinder3d shade3d lines3d spheres3d as.mesh3d
-#' @importFrom Morpho mergeMeshes
 #' @importFrom grDevices colorRamp rgb
 #'
 #' @examples 
@@ -149,7 +148,7 @@ plotConvexHull3d <- function(
     for(family in ufamilies){
       tomerge <- mergedFaces[[family]]
       if(length(tomerge) > 1L){
-        mesh <- refineMesh(mergeMeshes(tomerge))
+        mesh <- refineMesh(do.call(merge, tomerge))
       }else{
         mesh <- refineMesh(tomerge[[1L]])
       }

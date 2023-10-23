@@ -25,7 +25,7 @@ orderFace <- function(face) {
 #'
 #' @param hull a 3d convex hull, output of \code{\link{cxhull}}
 #' @param simplify Boolean, whether to return the faces as a matrix instead 
-#'   of a list if possible, i.e. when all faces have the same number of sides
+#'   of a list if possible, i.e. when all faces have the same number of edges
 #'
 #' @return A list giving the vertices and the faces.
 #' @export
@@ -33,8 +33,7 @@ orderFace <- function(face) {
 #' @importFrom data.table uniqueN
 #' 
 #' @note Unless all faces are triangular, the output does not define a mesh 
-#'   with coherently oriented faces. If you want correct face orientations, 
-#'   you can use the \strong{PolygonSoup} package. 
+#'   with coherently oriented faces. 
 #'
 #' @examples
 #' library(cxhull)
@@ -44,6 +43,11 @@ hullMesh <- function(hull, simplify = TRUE) {
   stopifnot(isBoolean(simplify))
   vertices <- VerticesXYZ(hull)
   faces <- lapply(hull[["facets"]], orderFace)
+  # transform indices to get vertex indices of the mesh
+  dict        <- 1L:nrow(vertices)
+  names(dict) <- rownames(vertices)
+  faces <- lapply(faces, function(x) dict[as.character(x)])
+  #
   if(simplify) {
     nsides <- uniqueN(lengths(faces))
     if(nsides == 1L) {

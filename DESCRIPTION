@@ -1,8 +1,8 @@
 Type: Package
 Package: cxhull
 Title: Convex Hull
-Version: 0.7.3
-Date: 2023-05-19
+Version: 0.7.3.9000
+Date: 2023-10-23
 Authors@R: c(
     person("C. B.", "Barber", role = "cph",
            comment = "author of the Qhull library"),
@@ -22,7 +22,6 @@ Depends:
 Imports: 
     data.table,
     grDevices,
-    Morpho,
     rgl,
     Rvcg
 Suggests: 

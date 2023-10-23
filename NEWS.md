@@ -1,3 +1,13 @@
+# cxhull 0.7.4
+
+- The faces of the mesh returned by the `hullMesh` function are now given by 
+the vertex indices of this mesh, while in the previous versions they were 
+given by the vertex indices of the original vertices (those for which the 
+convex hull is computed).
+
+- The package does no longer depend on the 'Morpho' package.
+
+
 # cxhull 0.7.3
 
 New argument `alpha` in the `plotConvexHull3d` function, to control the 
