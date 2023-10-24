@@ -4,16 +4,22 @@
 \alias{hullMesh}
 \title{Mesh of a 3d convex hull}
 \usage{
-hullMesh(hull, simplify = TRUE)
+hullMesh(hull, simplify = TRUE, rgl = FALSE)
 }
 \arguments{
 \item{hull}{a 3d convex hull, output of \code{\link{cxhull}}}
 
 \item{simplify}{Boolean, whether to return the faces as a matrix instead 
-of a list if possible, i.e. when all faces have the same number of edges}
+of a list if possible, i.e. if all faces have the same number of edges;
+this argument is possibly ignored if \code{rgl=TRUE}, see below}
+
+\item{rgl}{Boolean, whether to return a \strong{rgl} mesh (class 
+\code{mesh3d}) if possible, i.e. if each face has three or four edges; 
+if \code{TRUE} and the \strong{rgl} mesh is possible, then the 
+\code{simplify} argument has no effect}
 }
 \value{
-A list giving the vertices and the faces.
+A list giving the vertices and the faces, or a \strong{rgl} mesh.
 }
 \description{
 Extract the vertices and the faces from a 3d convex hull.
@@ -25,5 +31,8 @@ Unless all faces are triangular, the output does not define a mesh
 \examples{
 library(cxhull)
 hull <- cxhull(daVinciSphere)
-septuaginta <- hullMesh(hull)
+septuaginta <- hullMesh(hull, rgl = TRUE)
+library(rgl)
+open3d(windowRect = c(50, 50, 562, 562))
+shade3d(septuaginta, color = "darkred")
 }

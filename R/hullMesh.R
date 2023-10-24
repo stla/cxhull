@@ -25,12 +25,18 @@ orderFace <- function(face) {
 #'
 #' @param hull a 3d convex hull, output of \code{\link{cxhull}}
 #' @param simplify Boolean, whether to return the faces as a matrix instead 
-#'   of a list if possible, i.e. when all faces have the same number of edges
+#'   of a list if possible, i.e. if all faces have the same number of edges;
+#'   this argument is possibly ignored if \code{rgl=TRUE}, see below
+#' @param rgl Boolean, whether to return a \strong{rgl} mesh (class 
+#'   \code{mesh3d}) if possible, i.e. if each face has three or four edges; 
+#'   if \code{TRUE} and the \strong{rgl} mesh is possible, then the 
+#'   \code{simplify} argument has no effect
 #'
-#' @return A list giving the vertices and the faces.
+#' @return A list giving the vertices and the faces, or a \strong{rgl} mesh.
 #' @export
 #' 
 #' @importFrom data.table uniqueN
+#' @importFrom rgl mesh3d
 #' 
 #' @note Unless all faces are triangular, the output does not define a mesh 
 #'   with coherently oriented faces. 
@@ -38,9 +44,13 @@ orderFace <- function(face) {
 #' @examples
 #' library(cxhull)
 #' hull <- cxhull(daVinciSphere)
-#' septuaginta <- hullMesh(hull)
-hullMesh <- function(hull, simplify = TRUE) {
+#' septuaginta <- hullMesh(hull, rgl = TRUE)
+#' library(rgl)
+#' open3d(windowRect = c(50, 50, 562, 562))
+#' shade3d(septuaginta, color = "darkred")
+hullMesh <- function(hull, simplify = TRUE, rgl = FALSE) {
   stopifnot(isBoolean(simplify))
+  stopifnot(isBoolean(rgl))
   vertices <- VerticesXYZ(hull)
   faces <- lapply(hull[["facets"]], orderFace)
   # transform indices to get vertex indices of the mesh
@@ -48,10 +58,34 @@ hullMesh <- function(hull, simplify = TRUE) {
   names(dict) <- rownames(vertices)
   faces <- lapply(faces, function(x) dict[as.character(x)])
   #
+  if(rgl) {
+    nedges <- lengths(faces)
+    if(all(nedges %in% c(3L, 4L))) {
+      sfaces <- split(faces, nedges)
+      trgls <- sfaces[["3"]]
+      quads <- sfaces[["4"]]
+      if(!is.null(trgls)) {
+        trgls <- do.call(cbind, trgls)
+      }
+      if(!is.null(quads)) {
+        quads <- do.call(cbind, quads)
+      }
+      rmesh <- mesh3d(vertices, triangles = trgls, quads = quads)
+      return(rmesh)
+    } else {
+      warning(
+        "Cannot do a 'rgl' mesh (there are faces with five edges or more)."
+      )
+    }
+  }
   if(simplify) {
-    nsides <- uniqueN(lengths(faces))
-    if(nsides == 1L) {
+    N <- uniqueN(lengths(faces))
+    if(N == 1L) {
       faces <- do.call(rbind, faces)
+    } else {
+      message(
+        "Cannot stack the faces to a matrix - ignoring `simplify=TRUE`."
+      )
     }
   }
   list("vertices" = vertices, "faces" = faces)

@@ -5,6 +5,8 @@ the vertex indices of this mesh, while in the previous versions they were
 given by the vertex indices of the original vertices (those for which the 
 convex hull is computed).
 
+- The `hullMesh` function can now return a 'rgl' mesh.
+
 - The package does no longer depend on the 'Morpho' package.
 
 
