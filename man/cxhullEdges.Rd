@@ -68,7 +68,9 @@ grd <- as.matrix(expand.grid(values, values))
 grd <- grd[grd[, 1L] <= grd[, 2L], ]
 pairs <- apply(grd, 1L, paste0, collapse = "-")
 colors <- hcl.colors(nrow(grd), palette = "Hawaii", rev = TRUE)
-colors <- colorspace::darken(colors, amount = 0.3)
+if(require("colorspace")) {
+  colors <- colorspace::darken(colors, amount = 0.3)
+}
 names(colors) <- pairs
 # plot ####
 opar <- par(mar = c(0, 0, 0, 0))
